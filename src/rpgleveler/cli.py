@@ -1,5 +1,4 @@
 import argparse
-import json
 import sys
 from importlib.metadata import PackageNotFoundError, version
 
@@ -24,13 +23,23 @@ def parse_args() -> argparse.Namespace:
 
 def exit_with_error(message: str, args: argparse.Namespace) -> None:
     #prefix = "[verbose] " if args.verbose else ""
+    prefix = ""
     print(f"{prefix}{message}", file=sys.stderr)
     sys.exit(2)
 
 
+def create_dice_roller(seed: int | None) -> DiceRoller:
+    if seed is None:
+        return DiceRoller()
+    else:
+        custom_random = CustomRandom(seed)
+        return DiceRoller(custom_random)
+
+
 def main() -> None:
     args = parse_args()
-    rng = create_dice_roller(args.seed)
+    rng = create_dice_roller(None)
+    print(f"You rolled a {rng.roll('1d20')}")
 
 
 if __name__ == "__main__":

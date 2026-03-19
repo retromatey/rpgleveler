@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rpgleveler"
-version = "0.1.1"
+version = "0.0.1"
 description = "Level up characters for Basic Fantasy RPG."
 readme = "README.md"
 requires-python = ">=3.14"
@@ -63,6 +63,9 @@ ignore = []
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.ruff.lint.per-file-ignores]
+"src/rpgleveler/data/*.py" = ["E501"]
 
 # ---------------------------------------------
 # Mypy configuration
