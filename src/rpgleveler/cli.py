@@ -37,7 +37,8 @@ def create_dice_roller(seed: int | None) -> DiceRoller:
 
 
 def main() -> None:
-    args = parse_args()
+    #args = parse_args()
+    parse_args()
     rng = create_dice_roller(None)
     print(f"You rolled a {rng.roll('1d20')}")
 
