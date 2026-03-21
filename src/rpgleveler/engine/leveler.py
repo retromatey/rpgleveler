@@ -7,6 +7,7 @@ from rpgleveler.data.spell_slots import SpellSlotRow
 from rpgleveler.data.thief_skills import ThiefSkillData
 from rpgleveler.shared.character import Character
 from rpgleveler.shared.level_up_result import LevelUpResult
+from rpgleveler.shared.literals import ClassName
 
 
 class LevelUpError(Exception):
@@ -111,8 +112,6 @@ def _build_new_character(
     thief_skills: ThiefSkillData | None,
 ) -> Character:
     """Return a new Character with updated level-up values."""
-
-    # TODO: correct this code, but keep the "replace()" function here
     return replace(
         character,
         level=new_level,
