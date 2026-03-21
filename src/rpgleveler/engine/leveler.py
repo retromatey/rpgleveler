@@ -25,7 +25,7 @@ def level_up(
     _validate_can_level_up(character)
 
     old_level = character.level
-    new_level = _get_next_level(character)
+    new_level = character.level + 1
 
     hp_gained = _roll_hp_gain(character, rng)
     new_hp_total = character.hp + hp_gained
@@ -39,7 +39,6 @@ def level_up(
     new_character = _build_new_character(
         character=character,
         new_level=new_level,
-        hp_gained=hp_gained,
         new_hp_total=new_hp_total,
         new_attack_bonus=new_attack_bonus,
         saving_throws=saving_throws,
@@ -64,11 +63,6 @@ def level_up(
 
 def _validate_can_level_up(character: Character) -> None:
     """Raise an error if the character is not eligible to level up."""
-    raise NotImplementedError
-
-
-def _get_next_level(character: Character) -> int:
-    """Return the next level for the character."""
     raise NotImplementedError
 
 
@@ -110,7 +104,7 @@ def _build_new_character(
     character: Character,
     *,
     new_level: int,
-    hp_gained: int,
+    new_hp_total: int,
     new_attack_bonus: int,
     saving_throws: SavingThrowData,
     new_spell_slots: SpellSlotRow | None,
@@ -119,7 +113,7 @@ def _build_new_character(
     """Return a new Character with updated level-up values."""
 
     # TODO: correct this code, but keep the "replace()" function here
-    new_character = replace(
+    return replace(
         character,
         level=new_level,
         hp=new_hp_total,
@@ -128,4 +122,3 @@ def _build_new_character(
         spell_slots=new_spell_slots,
         thief_skills=thief_skills,
     )
-    return new_character

@@ -1,5 +1,5 @@
-from dataclasses import dataclass, fields
-from typing import Any, cast
+from dataclasses import dataclass
+from typing import Any
 
 from rpgleveler.data.saving_throws import SavingThrowData
 from rpgleveler.data.spell_slots import SpellSlotRow
