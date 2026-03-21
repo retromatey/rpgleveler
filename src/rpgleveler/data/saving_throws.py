@@ -30,7 +30,7 @@ from __future__ import annotations
 
 from typing import Final, TypedDict
 
-from rpgleveler.shared.literals import ClassName
+from rpgleveler.shared.literals import ClassName, RaceName
 
 
 class SavingThrowData(TypedDict):
@@ -136,5 +136,43 @@ SAVING_THROWS: Final[dict[ClassName, SavingThrowsByLevel]] = {
         18: {"death_ray_or_poison": 8,  "magic_wands": 9,  "paralysis_or_petrify": 8,  "dragon_breath": 11, "spells": 10},
         19: {"death_ray_or_poison": 7,  "magic_wands": 8,  "paralysis_or_petrify": 7,  "dragon_breath": 10, "spells": 9},
         20: {"death_ray_or_poison": 7,  "magic_wands": 8,  "paralysis_or_petrify": 7,  "dragon_breath": 10, "spells": 9},
+    },
+}
+
+
+SAVING_THROW_MODIFIERS: Final[dict[RaceName, SavingThrowData]] = {
+    "dwarf": {
+        # Negative values improve saving throws (lower is better)
+        "death_ray_or_poison": -4,
+        "magic_wands": -4,
+        "paralysis_or_petrify": -4,
+        "dragon_breath": -3,
+        "spells": -4,
+    },
+
+    "elf": {
+        # Negative values improve saving throws (lower is better)
+        "death_ray_or_poison": 0,
+        "magic_wands": -2,
+        "paralysis_or_petrify": -1,
+        "dragon_breath": 0,
+        "spells": -2,
+    },
+
+    "halfling": {
+        # Negative values improve saving throws (lower is better)
+        "death_ray_or_poison": -4,
+        "magic_wands": -4,
+        "paralysis_or_petrify": -4,
+        "dragon_breath": -3,
+        "spells": -4,
+    },
+
+    "human": {
+        "death_ray_or_poison": 0,
+        "magic_wands": 0,
+        "paralysis_or_petrify": 0,
+        "dragon_breath": 0,
+        "spells": 0,
     },
 }

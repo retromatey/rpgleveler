@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from rpgleveler.data.saving_throws import SavingThrowData
 from rpgleveler.data.spell_slots import SpellSlotRow
 from rpgleveler.data.thief_skills import ThiefSkillData
+from rpgleveler.data.turn_undead import TurnUndeadData
 from rpgleveler.shared.literals import ClassName
 
 
@@ -48,6 +49,11 @@ class LevelUpResult:
             Updated thief skill percentages for thieves.
             None for non-thief classes.
 
+        turn_undead:
+            Turn undead effectiveness values for clerics.
+            Maps undead types to turn results (target number, "T", or "D").
+            None for non-cleric classes.
+
     Notes:
         - This object represents the *resulting state*, not the delta between
           old and new values (except for hit points gained).
@@ -67,3 +73,4 @@ class LevelUpResult:
     # Optional class-specific changes
     new_spell_slots: SpellSlotRow | None = None
     thief_skills: ThiefSkillData | None = None
+    turn_undead: TurnUndeadData | None = None

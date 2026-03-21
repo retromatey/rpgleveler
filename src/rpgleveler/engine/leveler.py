@@ -1,3 +1,32 @@
+"""
+Level-up engine for Basic Fantasy RPG.
+
+This module orchestrates the process of advancing a character by one level.  It
+coordinates validation, progression lookups, hit point calculation, and
+construction of the updated character state.
+
+The level-up process is intentionally structured as a pure transformation:
+    - The input character is not modified
+    - A new Character instance is returned
+    - A LevelUpResult object summarizes the changes
+
+Flow:
+    1. Validate that the character can level up
+    2. Determine the next level
+    3. Calculate hit point gain
+    4. Retrieve updated progression data
+    5. Build a new Character instance
+    6. Construct a LevelUpResult summary
+    7. Return both the updated character and result
+
+Notes:
+    - This module contains no direct game rule logic.
+    - Rule implementations are delegated to:
+        - advancement.py (XP and level eligibility)
+        - progression.py (table lookups)
+        - hit_points.py (HP calculation)
+    - This separation keeps the engine maintainable and testable.
+"""
 from dataclasses import replace
 
 from diceroller.core import DiceRoller
@@ -5,9 +34,19 @@ from diceroller.core import DiceRoller
 from rpgleveler.data.saving_throws import SavingThrowData
 from rpgleveler.data.spell_slots import SpellSlotRow
 from rpgleveler.data.thief_skills import ThiefSkillData
+from rpgleveler.data.turn_undead import TurnUndeadData
+from rpgleveler.engine.advancement import can_level_up
+from rpgleveler.engine.hit_points import roll_hp_gain
+from rpgleveler.engine.progression import (
+    apply_saving_throw_modifiers,
+    get_attack_bonus,
+    get_saving_throws,
+    get_spell_slots,
+    get_thief_skills,
+    get_turn_undead,
+)
 from rpgleveler.shared.character import Character
 from rpgleveler.shared.level_up_result import LevelUpResult
-from rpgleveler.shared.literals import ClassName
 
 
 class LevelUpError(Exception):
@@ -20,22 +59,47 @@ def level_up(
     rng: DiceRoller
 ) -> tuple[Character, LevelUpResult]:
     """
-    Return a new character with one level applied, along with the result
-    summary.
+    Apply a single level-up to a character.
+
+    This function performs a complete level-up operation, returning both the
+    updated character state and a structured summary of the changes.
+
+    Args:
+        character:
+            The character to level up.
+        rng:
+            A DiceRoller instance used for hit point calculation.
+
+    Returns:
+        tuple[Character, LevelUpResult]:
+            A tuple containing:
+                - The new Character instance with updated values
+                - A LevelUpResult describing the changes
+
+    Raises:
+        LevelUpError:
+            If the character is not eligible to level up.
+
+    Notes:
+        - The original character is not modified.
+        - All rule logic is delegated to engine submodules.
     """
     _validate_can_level_up(character)
 
     old_level = character.level
     new_level = character.level + 1
 
-    hp_gained = _roll_hp_gain(character, rng)
+    hp_gained = roll_hp_gain(character, rng)
     new_hp_total = character.hp + hp_gained
 
-    new_attack_bonus = _get_attack_bonus_for_level(character.class_name, new_level)
-    saving_throws = _get_saving_throws_for_level(character.class_name, new_level)
+    new_attack_bonus = get_attack_bonus(character.class_name, new_level)
 
-    new_spell_slots = _get_spell_slots_for_level(character.class_name, new_level)
-    thief_skills = _get_thief_skills_for_level(character.class_name, new_level)
+    base_saves = get_saving_throws(character.class_name, new_level)
+    saving_throws = apply_saving_throw_modifiers(base_saves, character.race)
+
+    new_spell_slots = get_spell_slots(character.class_name, new_level)
+    thief_skills = get_thief_skills(character.class_name, new_level)
+    turn_undead = get_turn_undead(character.class_name, new_level)
 
     new_character = _build_new_character(
         character=character,
@@ -45,6 +109,7 @@ def level_up(
         saving_throws=saving_throws,
         new_spell_slots=new_spell_slots,
         thief_skills=thief_skills,
+        turn_undead=turn_undead,
     )
 
     level_up_result = LevelUpResult(
@@ -57,48 +122,29 @@ def level_up(
         saving_throws=saving_throws,
         new_spell_slots=new_spell_slots,
         thief_skills=thief_skills,
+        turn_undead=turn_undead,
     )
 
     return new_character, level_up_result
 
 
 def _validate_can_level_up(character: Character) -> None:
-    """Raise an error if the character is not eligible to level up."""
-    raise NotImplementedError
+    """
+    Validate that a character is eligible to level up.
 
+    This function delegates to the advancement module to determine whether the
+    character meets XP and level requirements.
 
-def _roll_hp_gain(character: Character, rng: DiceRoller) -> int:
-    """Roll hit point gain for the next level."""
-    raise NotImplementedError
+    Args:
+        character:
+            The character to validate.
 
-
-def _get_attack_bonus_for_level(class_name: ClassName, level: int) -> int:
-    """Return the attack bonus for the given class and level."""
-    raise NotImplementedError
-
-
-def _get_saving_throws_for_level(
-    class_name: ClassName, 
-    level: int
-) -> SavingThrowData:
-    """Return saving throws for the given class and level."""
-    raise NotImplementedError
-
-
-def _get_spell_slots_for_level(
-    class_name: ClassName, 
-    level: int
-) -> SpellSlotRow | None:
-    """Return spell slots for the given class and level, if applicable."""
-    raise NotImplementedError
-
-
-def _get_thief_skills_for_level(
-    class_name: ClassName, 
-    level: int
-) -> ThiefSkillData | None:
-    """Return thief skills for the given class and level, if applicable."""
-    raise NotImplementedError
+    Raises:
+        LevelUpError:
+            If the character does not qualify for level advancement.
+    """
+    if not can_level_up(character):
+        raise LevelUpError("Character cannot level up")
 
 
 def _build_new_character(
@@ -110,8 +156,40 @@ def _build_new_character(
     saving_throws: SavingThrowData,
     new_spell_slots: SpellSlotRow | None,
     thief_skills: ThiefSkillData | None,
+    turn_undead: TurnUndeadData | None
 ) -> Character:
-    """Return a new Character with updated level-up values."""
+    """
+    Construct a new Character instance with updated level-up values.
+
+    This function uses dataclasses.replace to preserve immutability while
+    updating only the fields affected by leveling.
+
+    Args:
+        character:
+            The original character.
+        new_level:
+            The updated level.
+        new_hp_total:
+            Total hit points after applying the HP gain.
+        new_attack_bonus:
+            Updated attack bonus.
+        saving_throws:
+            Updated saving throw values.
+        new_spell_slots:
+            Updated spell slots (if applicable).
+        thief_skills:
+            Updated thief skill values (if applicable).
+        turn_undead:
+            Updated turn undead values (if applicable).
+
+    Returns:
+        Character:
+            A new Character instance reflecting the updated state.
+
+    Notes:
+        - The original character is not modified.
+        - Only level-dependent fields are updated.
+    """
     return replace(
         character,
         level=new_level,
@@ -120,4 +198,5 @@ def _build_new_character(
         saving_throws=saving_throws,
         spell_slots=new_spell_slots,
         thief_skills=thief_skills,
+        turn_undead=turn_undead,
     )

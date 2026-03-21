@@ -4,7 +4,8 @@ from typing import Any
 from rpgleveler.data.saving_throws import SavingThrowData
 from rpgleveler.data.spell_slots import SpellSlotRow
 from rpgleveler.data.thief_skills import ThiefSkillData
-from rpgleveler.shared.literals import ClassName
+from rpgleveler.data.turn_undead import TurnUndeadData
+from rpgleveler.shared.literals import ClassName, RaceName
 
 
 @dataclass
@@ -73,6 +74,9 @@ class Character:
         saving_throws: 
             Saving throw targets keyed by saving throw name.
 
+        xp:
+            Amount of experience points the character currently has.
+
         spell_slots:
             Available spell slots by spell level for spellcasting classes.
             Represented as a fixed-length tuple of integers (levels 1–5).  None
@@ -81,6 +85,11 @@ class Character:
         thief_skills:
             Percentage chances for each thief skill.
             Populated only for thief characters; None for other classes.
+
+        turn_undead:
+            Turn undead effectiveness values for clerics.
+            Maps undead types to turn results (target number, "T", or "D").
+            None for non-cleric classes.
     """
 
     abilities: AbilityScores
@@ -93,10 +102,12 @@ class Character:
     level: int
     money_gp: int
     name: str | None
-    race: str
+    race: RaceName
     saving_throws: SavingThrowData
+    xp: int
     spell_slots: SpellSlotRow | None = None
     thief_skills: ThiefSkillData | None = None
+    turn_undead: TurnUndeadData | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize the character to a JSON-friendly dictionary.
@@ -110,6 +121,7 @@ class Character:
             "race": self.race,
             "class": self.class_name,
             "level": self.level,
+            "xp": self.xp,
             "abilities": vars(self.abilities),
             "ability_mods": self.ability_mods,
             "hp": self.hp,
@@ -118,6 +130,7 @@ class Character:
             "saving_throws": self.saving_throws,
             "spell_slots": self.spell_slots,
             "thief_skills": self.thief_skills,
+            "turn_undead": self.turn_undead,
             "money_gp": self.money_gp,
             "inventory": self.inventory,
         }
