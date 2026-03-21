@@ -1,6 +1,10 @@
 from dataclasses import dataclass, fields
 from typing import Any, cast
 
+from rpgleveler.data.saving_throws import SavingThrowData
+from rpgleveler.data.spell_slots import SpellSlotRow
+from rpgleveler.data.thief_skills import ThiefSkillData
+
 
 @dataclass
 class AbilityScores:
@@ -44,6 +48,8 @@ class Character:
         name: Optional character name.
         race: Normalized race name (lowercase).
         saving_throws: Saving throw targets keyed by saving throw name.
+        spell_slots: TODO: add comment for attribute.
+        thief_skills: TODO: add comment for attribute.
     """
 
     abilities: AbilityScores
@@ -57,7 +63,9 @@ class Character:
     money_gp: int
     name: str | None
     race: str
-    saving_throws: dict[str, int]
+    saving_throws: SavingThrowData
+    spell_slots: SpellSlotRow | None
+    thief_skills: ThiefSkillData | None
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize the character to a JSON-friendly dictionary.
@@ -77,6 +85,8 @@ class Character:
             "ac": self.ac,
             "attack_bonus": self.attack_bonus,
             "saving_throws": self.saving_throws,
+            "spell_slots": self.spell_slots,
+            "thief_skills": self.thief_skills,
             "money_gp": self.money_gp,
             "inventory": self.inventory,
         }

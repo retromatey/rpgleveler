@@ -1,6 +1,10 @@
 from dataclasses import replace
 
 from diceroller.core import DiceRoller
+
+from rpgleveler.data.saving_throws import SavingThrowData
+from rpgleveler.data.spell_slots import SpellSlotRow
+from rpgleveler.data.thief_skills import ThiefSkillData
 from rpgleveler.shared.character import Character
 from rpgleveler.shared.level_up_result import LevelUpResult
 
@@ -117,9 +121,11 @@ def _build_new_character(
     # TODO: correct this code, but keep the "replace()" function here
     new_character = replace(
         character,
-        level = new_level,
-        hp = new_hp_total,
-        attack_bonus = new_attack_bonus,
-        saving_throws = saving_throws,
+        level=new_level,
+        hp=new_hp_total,
+        attack_bonus=new_attack_bonus,
+        saving_throws=saving_throws,
+        spell_slots=new_spell_slots,
+        thief_skills=thief_skills,
     )
     return new_character
