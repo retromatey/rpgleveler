@@ -33,16 +33,29 @@ to immediately affect the installed package.
 The repository uses the **src layout**.
 
 ```
-rpgleveler/
-├─ src/
-│  └─ rpgleveler/
-│     ├─ something.py
-│     └─ somethingelse.py
-│
-├─ tests/
-├─ docs/
-├─ pyproject.toml
-└─ mkdocs.yml
+rpgleveler
+├── src
+│   └── rpgleveler
+│       ├── data
+│       │   ├── attack_bonus.py
+│       │   ├── saving_throws.py
+│       │   ├── spell_slots.py
+│       │   ├── thief_skills.py
+│       │   ├── turn_undead.py
+│       │   └── xp_tables.py
+│       ├── engine
+│       │   ├── advancement.py
+│       │   ├── hit_points.py
+│       │   ├── leveler.py
+│       │   └── progression.py
+│       └── shared
+│           ├── character.py
+│           ├── level_up_result.py
+│           └── literals.py
+├── tests
+├── docs
+├── mkdocs.yml
+└── pyproject.toml
 ```
 
 Key directories:

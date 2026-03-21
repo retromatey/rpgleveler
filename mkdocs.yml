@@ -67,7 +67,13 @@ nav:
   - CLI Usage: cli.md
   - Character Leveling: character-leveling.md
   - API Reference:
-      - Character Leveler: api/character_leveler.md
+      - Overview: api/index.md
+      - Leveler: api/leveler.md
+      - Character: api/character.md
+      - LevelUpResult: api/level_up_result.md
+      - Progression: api/progression.md
+      - Hit Points: api/hit_points.md
+      - Advancement: api/advancement.md
   - Development: development.md
 
 copyright: Copyright © 2026 Jason Tennant — MIT License
