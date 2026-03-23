@@ -46,7 +46,7 @@ mkdocs serve
 ## Testing Guidelines
 - Framework: `pytest` with `pytest-cov`.
 - Test files: `test_*.py`; test functions: `test_*`.
-- Use markers consistently: `@pytest.mark.unit` or `@pytest.mark.integration`.
+- Marks are auto-applied by folder via the `conftest.py` file.
 - Add unit tests for logic changes in `engine/` and table validation tests for
   `data/` updates.
 
@@ -61,3 +61,17 @@ For pull requests:
 - update docs when API or CLI behavior changes.
 
 PRs should pass the CI workflow (`ruff`, `mypy`, `pytest`, `build`) before merge.
+
+## Implementation Guidelines
+
+When implementing or modifying code:
+
+- Prefer the smallest change necessary to satisfy existing tests.
+- Do not redesign module structure or move responsibilities across layers.
+- Keep logic within its intended domain:
+  - `data/` for static tables
+  - `engine/` for rule logic
+  - `shared/` for models and types
+- Preserve immutability patterns (do not mutate Character in place).
+- Do not introduce speculative features or functionality not covered by tests.
+- Avoid adding new dependencies unless clearly justified.
