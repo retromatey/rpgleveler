@@ -22,11 +22,42 @@ Notes:
     - This module should be the only place where progression tables
       are accessed directly by the engine layer.
 """
-from rpgleveler.data.saving_throws import SavingThrowData
-from rpgleveler.data.spell_slots import SpellSlotRow
-from rpgleveler.data.thief_skills import ThiefSkillData
-from rpgleveler.data.turn_undead import TurnUndeadData
+from typing import cast
+
+from rpgleveler.data.attack_bonus import ATTACK_BONUS
+from rpgleveler.data.saving_throws import (
+    SAVING_THROW_MODIFIERS,
+    SAVING_THROWS,
+    SavingThrowData,
+)
+from rpgleveler.data.spell_slots import SPELL_SLOTS, SpellSlotRow
+from rpgleveler.data.thief_skills import THIEF_SKILLS, ThiefSkillData
+from rpgleveler.data.turn_undead import TURN_UNDEAD, TurnUndeadData
 from rpgleveler.shared.literals import ClassName, RaceName
+
+
+def _normalize_class_name(class_name: str) -> str:
+    """Normalize common external class aliases to canonical table keys."""
+    if class_name == "magic_user":
+        return "magic-user"
+    return class_name
+
+
+def _class_key(class_name: ClassName, table: dict[ClassName, object]) -> ClassName:
+    normalized = _normalize_class_name(class_name)
+    if normalized not in table:
+        raise KeyError(normalized)
+    return cast(ClassName, normalized)
+
+
+def _copy_saving_throws(data: SavingThrowData) -> SavingThrowData:
+    return {
+        "death_ray_or_poison": data["death_ray_or_poison"],
+        "magic_wands": data["magic_wands"],
+        "paralysis_or_petrify": data["paralysis_or_petrify"],
+        "dragon_breath": data["dragon_breath"],
+        "spells": data["spells"],
+    }
 
 
 def get_attack_bonus(class_name: ClassName, level: int) -> int:
@@ -47,7 +78,8 @@ def get_attack_bonus(class_name: ClassName, level: int) -> int:
         KeyError:
             If the class or level is not found in the progression table.
     """
-    raise NotImplementedError
+    class_key = _class_key(class_name, cast(dict[ClassName, object], ATTACK_BONUS))
+    return ATTACK_BONUS[class_key][level]
 
 
 def get_saving_throws(class_name: ClassName, level: int) -> SavingThrowData:
@@ -68,7 +100,8 @@ def get_saving_throws(class_name: ClassName, level: int) -> SavingThrowData:
         KeyError:
             If the class or level is not found in the progression table.
     """
-    raise NotImplementedError
+    class_key = _class_key(class_name, cast(dict[ClassName, object], SAVING_THROWS))
+    return _copy_saving_throws(SAVING_THROWS[class_key][level])
 
 
 def apply_saving_throw_modifiers(
@@ -115,7 +148,14 @@ def apply_saving_throw_modifiers(
         Result:
             {"death_ray_or_poison": 10, "magic_wands": 12, ...}
     """
-    raise NotImplementedError
+    result = cast(dict[str, int], dict(cast(dict[str, int], base_saving_throws)))
+    modifiers = SAVING_THROW_MODIFIERS.get(race)
+    if modifiers is None:
+        return cast(SavingThrowData, result)
+
+    for key, value in result.items():
+        result[key] = value + cast(int, modifiers.get(key, 0))
+    return cast(SavingThrowData, result)
 
 
 def get_spell_slots(class_name: ClassName, level: int) -> SpellSlotRow | None:
@@ -136,7 +176,11 @@ def get_spell_slots(class_name: ClassName, level: int) -> SpellSlotRow | None:
     Notes:
         - Only clerics and magic-users have spell slots.
     """
-    raise NotImplementedError
+    table_class = _normalize_class_name(class_name)
+    if table_class in {"fighter", "thief"}:
+        return None
+    class_key = _class_key(class_name, cast(dict[ClassName, object], SPELL_SLOTS))
+    return SPELL_SLOTS[class_key][level]
 
 
 def get_thief_skills(class_name: ClassName, level: int) -> ThiefSkillData | None:
@@ -154,7 +198,12 @@ def get_thief_skills(class_name: ClassName, level: int) -> ThiefSkillData | None
             A mapping of thief skills to percentage values,
             or None if the class is not a thief.
     """
-    raise NotImplementedError
+    table_class = _normalize_class_name(class_name)
+    if table_class == "thief":
+        return cast(ThiefSkillData, THIEF_SKILLS[level].copy())
+    if table_class in {"cleric", "fighter", "magic-user"}:
+        return None
+    raise KeyError(table_class)
 
 
 def get_turn_undead(class_name: ClassName, level: int) -> TurnUndeadData | None:
@@ -176,4 +225,9 @@ def get_turn_undead(class_name: ClassName, level: int) -> TurnUndeadData | None:
         - Turn results may be integers (target rolls), "T" (turn),
           or "D" (destroy).
     """
-    raise NotImplementedError
+    table_class = _normalize_class_name(class_name)
+    if table_class == "cleric":
+        return cast(TurnUndeadData, TURN_UNDEAD[level].copy())
+    if table_class in {"fighter", "magic-user", "thief"}:
+        return None
+    raise KeyError(table_class)
