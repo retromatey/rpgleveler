@@ -177,7 +177,7 @@ def get_spell_slots(class_name: ClassName, level: int) -> SpellSlotRow | None:
         - Only clerics and magic-users have spell slots.
     """
     table_class = _normalize_class_name(class_name)
-    if table_class in {"fighter", "thief"}:
+    if table_class not in SPELL_SLOTS:
         return None
     class_key = _class_key(class_name, cast(dict[ClassName, object], SPELL_SLOTS))
     return SPELL_SLOTS[class_key][level]
