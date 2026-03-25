@@ -8,8 +8,9 @@ Since this is a data table test, we are just verifying the following:
 - values are sane
 
 """
+import pytest
 
-from rpgleveler.data.saving_throws import SAVING_THROWS
+from rpgleveler.data.saving_throws import clone_saving_throws, SAVING_THROWS
 from rpgleveler.shared.literals import ClassName
 
 EXPECTED_CLASSES: set[ClassName] = {"cleric", "fighter", "magic-user", "thief"}
@@ -49,3 +50,39 @@ def test_values_are_reasonable():
         for level_data in class_data.values():
             for value in level_data.values():
                 assert 2 <= value <= 20
+
+
+def test_clone_saving_throws_returns_copy():
+    original = {
+        "death_ray_or_poison": 12,
+        "magic_wands": 13,
+        "paralysis_or_petrify": 14,
+        "dragon_breath": 15,
+        "spells": 16,
+    }
+
+    cloned = clone_saving_throws(original)
+
+    # Not the same object
+    assert cloned is not original
+
+    # Same values
+    assert cloned == original
+
+
+def test_clone_saving_throws_does_not_mutate_original():
+    original = {
+        "death_ray_or_poison": 12,
+        "magic_wands": 13,
+        "paralysis_or_petrify": 14,
+        "dragon_breath": 15,
+        "spells": 16,
+    }
+
+    cloned = clone_saving_throws(original)
+
+    # Mutate the clone
+    cloned["spells"] = 99
+
+    # Original should remain unchanged
+    assert original["spells"] == 16

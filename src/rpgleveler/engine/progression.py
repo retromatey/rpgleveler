@@ -26,6 +26,7 @@ from typing import cast
 
 from rpgleveler.data.attack_bonus import ATTACK_BONUS
 from rpgleveler.data.saving_throws import (
+    clone_saving_throws,
     SAVING_THROW_MODIFIERS,
     SAVING_THROWS,
     SavingThrowData,
@@ -48,16 +49,6 @@ def _class_key(class_name: ClassName, table: dict[ClassName, object]) -> ClassNa
     if normalized not in table:
         raise KeyError(normalized)
     return cast(ClassName, normalized)
-
-
-def _copy_saving_throws(data: SavingThrowData) -> SavingThrowData:
-    return {
-        "death_ray_or_poison": data["death_ray_or_poison"],
-        "magic_wands": data["magic_wands"],
-        "paralysis_or_petrify": data["paralysis_or_petrify"],
-        "dragon_breath": data["dragon_breath"],
-        "spells": data["spells"],
-    }
 
 
 def get_attack_bonus(class_name: ClassName, level: int) -> int:
@@ -101,7 +92,7 @@ def get_saving_throws(class_name: ClassName, level: int) -> SavingThrowData:
             If the class or level is not found in the progression table.
     """
     class_key = _class_key(class_name, cast(dict[ClassName, object], SAVING_THROWS))
-    return _copy_saving_throws(SAVING_THROWS[class_key][level])
+    return clone_saving_throws(SAVING_THROWS[class_key][level])
 
 
 def apply_saving_throw_modifiers(

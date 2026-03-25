@@ -28,7 +28,7 @@ Notes:
 
 from __future__ import annotations
 
-from typing import Final, TypedDict
+from typing import Final, TypedDict, cast
 
 from rpgleveler.shared.literals import ClassName, RaceName
 
@@ -43,6 +43,11 @@ class SavingThrowData(TypedDict):
 
 
 type SavingThrowsByLevel = dict[int, SavingThrowData]
+
+
+def clone_saving_throws(data: SavingThrowData) -> SavingThrowData:
+    """Clone saving throw data to avoid mutation of source tables."""
+    return cast(SavingThrowData, dict(data))
 
 
 # Saving throw progression tables keyed by class name.
