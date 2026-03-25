@@ -26,10 +26,10 @@ from typing import cast
 
 from rpgleveler.data.attack_bonus import ATTACK_BONUS
 from rpgleveler.data.saving_throws import (
-    clone_saving_throws,
     SAVING_THROW_MODIFIERS,
     SAVING_THROWS,
     SavingThrowData,
+    clone_saving_throws,
 )
 from rpgleveler.data.spell_slots import SPELL_SLOTS, SpellSlotRow
 from rpgleveler.data.thief_skills import THIEF_SKILLS, ThiefSkillData
@@ -39,9 +39,10 @@ from rpgleveler.shared.literals import ClassName, RaceName
 
 def _normalize_class_name(class_name: str) -> str:
     """Normalize common external class aliases to canonical table keys."""
-    if class_name == "magic_user":
+    name = class_name.lower()
+    if name == "magic_user":
         return "magic-user"
-    return class_name
+    return name
 
 
 def _class_key(class_name: ClassName, table: dict[ClassName, object]) -> ClassName:
@@ -139,14 +140,28 @@ def apply_saving_throw_modifiers(
         Result:
             {"death_ray_or_poison": 10, "magic_wands": 12, ...}
     """
-    result = cast(dict[str, int], dict(cast(dict[str, int], base_saving_throws)))
     modifiers = SAVING_THROW_MODIFIERS.get(race)
+    
     if modifiers is None:
-        return cast(SavingThrowData, result)
+        return base_saving_throws
 
-    for key, value in result.items():
-        result[key] = value + cast(int, modifiers.get(key, 0))
-    return cast(SavingThrowData, result)
+    return {
+        "death_ray_or_poison": 
+            base_saving_throws["death_ray_or_poison"] + 
+            modifiers.get("death_ray_or_poison", 0),
+        "magic_wands": 
+            base_saving_throws["magic_wands"] + 
+            modifiers.get("magic_wands", 0),
+        "paralysis_or_petrify": 
+            base_saving_throws["paralysis_or_petrify"] + 
+            modifiers.get("paralysis_or_petrify", 0),
+        "dragon_breath": 
+            base_saving_throws["dragon_breath"] + 
+            modifiers.get("dragon_breath", 0),
+        "spells": 
+            base_saving_throws["spells"] + 
+            modifiers.get("spells", 0),
+    }
 
 
 def get_spell_slots(class_name: ClassName, level: int) -> SpellSlotRow | None:

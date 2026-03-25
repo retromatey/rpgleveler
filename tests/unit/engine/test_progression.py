@@ -51,6 +51,11 @@ def test_apply_saving_throw_modifiers_returns_new_dict():
     base = {
         "death_ray_or_poison": 12,
         "magic_wands": 13,
+        "death_ray_or_poison": 12,
+        "magic_wands": 13,
+        "paralysis_or_petrify": 14,
+        "dragon_breath": 15,
+        "spells": 16,
     }
     result = apply_saving_throw_modifiers(base, "human")
     assert result is not base
@@ -60,6 +65,11 @@ def test_apply_saving_throw_modifiers_applies_values():
     base = {
         "death_ray_or_poison": 12,
         "magic_wands": 13,
+        "death_ray_or_poison": 12,
+        "magic_wands": 13,
+        "paralysis_or_petrify": 14,
+        "dragon_breath": 15,
+        "spells": 16,
     }
     result = apply_saving_throw_modifiers(base, "dwarf")
     # exact values depend on your table, but we expect *some* change
@@ -86,6 +96,11 @@ def test_get_spell_slots_returns_none_for_non_caster():
 
 # --- Thief Skills -------------------------------------------------------------
 
+def test_get_thief_skills_throws_invalid_class_raises():
+    with pytest.raises(KeyError):
+        get_thief_skills("invalid_class", 1)
+
+
 def test_get_thief_skills_returns_dict_for_thief():
     result = get_thief_skills("thief", 1)
     assert isinstance(result, dict)
@@ -97,6 +112,10 @@ def test_get_thief_skills_returns_none_for_non_thief():
 
 
 # --- Turn Undead --------------------------------------------------------------
+
+def test_get_turn_undead_throws_invalid_class_raises():
+    with pytest.raises(KeyError):
+        get_turn_undead("invalid_class", 1)
 
 def test_get_turn_undead_returns_dict_for_cleric():
     result = get_turn_undead("cleric", 1)
