@@ -8,7 +8,7 @@ Structure:
     ATTACK_BONUS[class_name][level] -> attack_bonus
 
 Where:
-    - class_name is a ClassName literal (e.g., "fighter", "cleric")
+    - class_name is a ClassName enum
     - level is the character level (int)
     - attack_bonus is the base bonus applied to attack rolls
 
@@ -22,17 +22,21 @@ from __future__ import annotations
 
 from typing import Final
 
-from rpgleveler.shared.literals import ClassName
+from rpgleveler.shared import ClassName
 
 # Mapping of character level to attack bonus.
 type AttackBonusByLevel = dict[int, int]
 
 
+# Mapping of class name to attack bonus data.
+type AttackBonusByClassName = dict[ClassName, AttackBonusByLevel]
+
+
 # Attack bonus progression tables keyed by class name.
 # Values are derived from Basic Fantasy RPG class tables.
 # This data is treated as immutable game rules.
-ATTACK_BONUS: Final[dict[ClassName, AttackBonusByLevel]] = {
-    "cleric": {
+ATTACK_BONUS: Final[AttackBonusByClassName] = {
+    ClassName.CLERIC: {
         1: 1,
         2: 2,
         3: 2,
@@ -54,7 +58,7 @@ ATTACK_BONUS: Final[dict[ClassName, AttackBonusByLevel]] = {
         19: 10,
         20: 11,
     },
-    "fighter": {
+    ClassName.FIGHTER: {
         1: 1,
         2: 2,
         3: 3,
@@ -76,7 +80,7 @@ ATTACK_BONUS: Final[dict[ClassName, AttackBonusByLevel]] = {
         19: 19,
         20: 20,
     },
-    "magic-user": {
+    ClassName.MAGIC_USER: {
         1: 1,
         2: 1,
         3: 2,
@@ -98,7 +102,7 @@ ATTACK_BONUS: Final[dict[ClassName, AttackBonusByLevel]] = {
         19: 10,
         20: 10,
     },
-    "thief": {
+    ClassName.THIEF: {
         1: 1,
         2: 2,
         3: 2,
