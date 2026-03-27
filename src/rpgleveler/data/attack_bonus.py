@@ -1,11 +1,42 @@
 """
-TODO: add comments
+Attack bonus progression tables for Basic Fantasy RPG.
+
+This module defines the base attack bonus for each character class at each
+level.  The data is derived directly from the official Basic Fantasy RPG class
+progression tables and is treated as immutable game rules.
+
+Structure:
+    ATTACK_BONUS[class_name][level] -> attack_bonus
+
+Where:
+    - class_name is a `ClassName` enum
+    - level is the character level (int)
+    - attack_bonus is the base modifier applied to attack rolls
+
+Implementation details:
+    - Raw data is defined in a mutable dictionary for readability.
+    - Data is then wrapped using `MappingProxyType` to enforce runtime
+      immutability.
+    - Both outer (class) and inner (level) mappings are protected.
+
+Notes:
+    - Attack bonus progression varies by class.
+    - Values increase stepwise according to class tables.
+    - Consumers should use `get_attack_bonus()` instead of accessing the table
+      directly.
+
+Example:
+    >>> get_attack_bonus(ClassName.FIGHTER, 5)
+    5
+
+    >>> get_attack_bonus(ClassName.MAGIC_USER, 1)
+    1
 """
 
 from __future__ import annotations
 
 from types import MappingProxyType
-from typing import Final, cast
+from typing import Final
 
 from rpgleveler.shared import ClassName
 
@@ -115,22 +146,57 @@ _raw_attack_bonus: Final[AttackBonusByClassName] = {
 def _freeze(data: AttackBonusByClassName
 ) -> MappingProxyType[ClassName, MappingProxyType[int, int]]:
     """
-    TODO: add comments
+    Convert nested dictionaries into fully immutable mappings.
+
+    This function wraps both the outer dictionary (keyed by `ClassName`) and
+    each inner dictionary (keyed by level) using `MappingProxyType`, producing a
+    read-only view of the data.
+
+    Args:
+        data: Mutable attack bonus mapping.
+
+    Returns:
+        A nested `MappingProxyType` structure that prevents modification at
+        runtime.
+
+    Notes:
+        - The returned mapping is a read-only view; attempting to modify it will
+          raise `TypeError`.
+        - The original input dictionary should not be modified after freezing,
+          as changes would still be reflected in the proxy.
     """
     return MappingProxyType({
         cls: MappingProxyType(levels) for cls, levels in data.items()
     })
 
 
+# Public, immutable attack bonus table.
 ATTACK_BONUS = _freeze(_raw_attack_bonus)
 
 
 def get_attack_bonus(class_name: ClassName, level: int) -> int:
     """
-    TODO: add comments
+    Retrieve the attack bonus for a given class and level.
+
+    This function provides a safe access layer over the attack bonus table,
+    ensuring that invalid inputs are handled consistently.
+
+    Args:
+        class_name: The character class.
+        level: The character level (1–20).
+
+    Returns:
+        The attack bonus for the specified class and level.
+
+    Raises:
+        ValueError: If the class or level is not present in the table.
+
+    Example:
+        >>> get_attack_bonus(ClassName.CLERIC, 4)
+        3
     """
     try:
-        return cast(int, ATTACK_BONUS[class_name][level])
+        return ATTACK_BONUS[class_name][level]
     except KeyError:
         err_msg = f"Invalid class/level combination: {class_name}, {level}"
         raise ValueError(err_msg)
