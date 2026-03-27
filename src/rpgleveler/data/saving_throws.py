@@ -1,29 +1,45 @@
 """
 Saving throw progression tables for Basic Fantasy RPG.
 
-This module defines saving throw values for each class at each level.  The data
-is derived directly from the official Basic Fantasy RPG class progression
-tables.
+This module defines saving throw target values for each character class at each
+level, along with racial modifiers that adjust those values.
+
+Saving throws represent the minimum d20 roll required to resist various effects.
+Lower values are better.
 
 Structure:
     SAVING_THROWS[class_name][level] -> SavingThrowData
+    SAVING_THROW_MODIFIERS[race] -> SavingThrowData
 
 Where:
-    - class_name is a ClassName literal (e.g., "fighter", "cleric")
+    - class_name is a `ClassName` enum
+    - race is a `Race` enum
     - level is the character level (int)
-    - SavingThrowData is a mapping of saving throw categories to target values
+    - SavingThrowData contains values for all saving throw categories
 
 Saving throw categories:
-    - death_ray_or_poison
-    - magic_wands
-    - paralysis_or_petrify
-    - dragon_breath
-    - spells
+    - death_ray_or_poison: Effects involving poison or instant death
+    - magic_wands: Effects from wands and similar magical devices
+    - paralysis_or_petrify: Effects that immobilize or turn to stone
+    - dragon_breath: Area effects such as dragon breath attacks
+    - spells: General magical spell effects
+
+Implementation details:
+    - Base saving throw tables are defined per class and level.
+    - Racial modifiers are applied as adjustments to these base values.
+    - All data is frozen at runtime using `MappingProxyType` and frozen
+      dataclasses.
+    - Consumers should use `get_saving_throws()` rather than accessing tables
+      directly.
 
 Notes:
     - Lower values are better (target number to meet or exceed on d20).
-    - Each class has its own progression table.
-    - The data is static and should not be modified at runtime.
+    - Data is derived from official Basic Fantasy RPG tables.
+    - The data is treated as immutable game rules.
+
+Example:
+    >>> get_saving_throws(ClassName.CLERIC, Race.HUMAN, 1)
+    SavingThrowData(death_ray_or_poison=11, magic_wands=12, ...)
 """
 
 from __future__ import annotations
@@ -37,14 +53,18 @@ from rpgleveler.shared import ClassName, Race
 
 @dataclass(frozen=True)
 class SavingThrowData:
-    """Container for saving throws categories in Basic Fantasy.
+    """
+    Immutable container for saving throw values.
+
+    Each field represents the target number required to succeed on a d20 roll
+    against a specific category of effect. Lower values indicate better saves.
 
     Attributes:
-        death_ray_or_poison: comment here...
-        magic_wands: comment here...
-        paralysis_or_petrify: comment here...
-        dragon_breath: comment here...
-        spells: comment here...
+        death_ray_or_poison: Resistance to poison and instant-death effects
+        magic_wands: Resistance to effects from magical wands
+        paralysis_or_petrify: Resistance to paralysis and petrification effects
+        dragon_breath: Resistance to breath weapons and area attacks
+        spells: Resistance to general spell effects
     """
     death_ray_or_poison: int
     magic_wands: int
@@ -53,6 +73,17 @@ class SavingThrowData:
     spells: int
 
     def add(self, other: SavingThrowData) -> SavingThrowData:
+        """
+        Combine two saving throw datasets.
+
+        This is primarily used to apply racial modifiers to base class values.
+
+        Args:
+            other: Another `SavingThrowData` instance to add.
+
+        Returns:
+            A new `SavingThrowData` instance with combined values.
+        """
         return SavingThrowData(
             death_ray_or_poison=self.death_ray_or_poison + other.death_ray_or_poison,
             magic_wands=self.magic_wands + other.magic_wands,
@@ -63,12 +94,15 @@ class SavingThrowData:
 
 
 type SavingThrowsByLevel = dict[int, SavingThrowData]
+"""Mapping of level → saving throw values."""
 
 
 type SavingThrowsByClassName = dict[ClassName, SavingThrowsByLevel]
+"""Mapping of class → level-based saving throw progression."""
 
 
 type SavingThrowsByRace = dict[Race, SavingThrowData]
+"""Mapping of race → saving throw modifiers."""
 
 
 # Saving throw progression tables keyed by class name.
@@ -206,6 +240,18 @@ _raw_saving_throw_modifiers: Final[SavingThrowsByRace] = {
 
 def _freeze_class_saving_throws(data: SavingThrowsByClassName
 ) -> MappingProxyType[ClassName, MappingProxyType[int, SavingThrowData]]:
+    """
+    Convert nested class-based saving throw data into immutable mappings.
+
+    Both the outer mapping (class → levels) and inner mappings (level → data)
+    are wrapped in `MappingProxyType` to prevent modification at runtime.
+
+    Args:
+        data: Mutable saving throw data by class.
+
+    Returns:
+        A fully read-only nested mapping structure.
+    """
     return MappingProxyType({
         cls: MappingProxyType(levels) for cls, levels in data.items()
     })
@@ -213,6 +259,18 @@ def _freeze_class_saving_throws(data: SavingThrowsByClassName
 
 def _freeze_race_modifiers(data: SavingThrowsByRace
 ) -> MappingProxyType[Race, SavingThrowData]:
+    """
+    Convert race-based modifier data into an immutable mapping.
+
+    Since `SavingThrowData` instances are already frozen, only the outer mapping
+    needs to be wrapped.
+
+    Args:
+        data: Mutable race modifier data.
+
+    Returns:
+        A read-only mapping of race → saving throw modifiers.
+    """
     return MappingProxyType(data)
 
 
@@ -228,15 +286,35 @@ def get_saving_throws(
     class_name: ClassName, 
     race: Race, 
     level: int) -> SavingThrowData:
-    try:
-        if class_name not in SAVING_THROWS:
-            raise ValueError(f"Invalid class: {class_name}")
-        if race not in SAVING_THROW_MODIFIERS:
-            raise ValueError(f"Invalid race: {race}")
-        if level not in SAVING_THROWS[class_name]:
-            raise ValueError(f"Invalid level: {level}")
-        saving_throws = SAVING_THROWS[class_name][level]
-        modifiers = SAVING_THROW_MODIFIERS[race]
-        return saving_throws.add(modifiers)
-    except ValueError:
-        raise
+    """
+    Retrieve the effective saving throws for a character.
+
+    This function combines base class saving throws with racial modifiers to
+    produce the final saving throw values for a given character.
+
+    Args:
+        class_name: The character class.
+        race: The character race.
+        level: The character level (1–20).
+
+    Returns:
+        A `SavingThrowData` instance representing the final saving throws.
+
+    Raises:
+        ValueError: If the class, race, or level is invalid.
+
+    Example:
+        >>> get_saving_throws(ClassName.FIGHTER, Race.ELF, 5)
+        SavingThrowData(...)
+    """
+    if class_name not in SAVING_THROWS:
+        raise ValueError(f"Invalid class: {class_name}")
+    if race not in SAVING_THROW_MODIFIERS:
+        raise ValueError(f"Invalid race: {race}")
+    if level not in SAVING_THROWS[class_name]:
+        raise ValueError(f"Invalid level: {level}")
+
+    saving_throws = SAVING_THROWS[class_name][level]
+    modifiers = SAVING_THROW_MODIFIERS[race]
+
+    return saving_throws.add(modifiers)

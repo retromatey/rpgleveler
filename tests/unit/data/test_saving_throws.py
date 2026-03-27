@@ -1,88 +1,167 @@
-"""
-Since this is a data table test, we are just verifying the following:
+from types import MappingProxyType
 
-- keys exist
-- levels exist
-- fields exist
-- types are correct
-- values are sane
-
-"""
 import pytest
 
-from rpgleveler.data.saving_throws import clone_saving_throws, SAVING_THROWS
-from rpgleveler.shared.literals import ClassName
+from rpgleveler.data.saving_throws import (
+    SAVING_THROW_MODIFIERS,
+    SAVING_THROWS,
+    SavingThrowData,
+    _freeze_class_saving_throws,
+    _freeze_race_modifiers,
+    get_saving_throws,
+)
+from rpgleveler.shared import ClassName, Race
 
-EXPECTED_CLASSES: set[ClassName] = {"cleric", "fighter", "magic-user", "thief"}
-EXPECTED_LEVELS = set(range(1, 21))
+# ----------------------------
+# SavingThrowData behavior
+# ----------------------------
 
+def test_saving_throw_data_is_frozen():
+    data = SavingThrowData(1, 2, 3, 4, 5)
+
+    with pytest.raises(Exception):
+        data.spells = 999  # frozen dataclass
+
+
+def test_saving_throw_add():
+    base = SavingThrowData(10, 10, 10, 10, 10)
+    mod = SavingThrowData(-1, -2, -3, -4, -5)
+
+    result = base.add(mod)
+
+    assert result.death_ray_or_poison == 9
+    assert result.magic_wands == 8
+    assert result.paralysis_or_petrify == 7
+    assert result.dragon_breath == 6
+    assert result.spells == 5
+
+
+# ----------------------------
+# Freeze helpers
+# ----------------------------
+
+def test_freeze_class_saving_throws():
+    raw = {
+        ClassName.CLERIC: {
+            1: SavingThrowData(1, 1, 1, 1, 1)
+        }
+    }
+
+    frozen = _freeze_class_saving_throws(raw)
+
+    assert isinstance(frozen, MappingProxyType)
+    assert isinstance(frozen[ClassName.CLERIC], MappingProxyType)
+
+    # Outer immutable
+    with pytest.raises(TypeError):
+        frozen[ClassName.FIGHTER] = {}
+
+    # Inner immutable
+    with pytest.raises(TypeError):
+        frozen[ClassName.CLERIC][1] = SavingThrowData(0, 0, 0, 0, 0)
+
+
+def test_freeze_race_modifiers():
+    raw = {
+        Race.HUMAN: SavingThrowData(0, 0, 0, 0, 0)
+    }
+
+    frozen = _freeze_race_modifiers(raw)
+
+    assert isinstance(frozen, MappingProxyType)
+
+    with pytest.raises(TypeError):
+        frozen[Race.ELF] = SavingThrowData(0, 0, 0, 0, 0)
+
+
+# ----------------------------
+# Data integrity
+# ----------------------------
 
 def test_all_classes_present():
-    assert set(SAVING_THROWS.keys()) == EXPECTED_CLASSES
+    expected = {
+        ClassName.CLERIC,
+        ClassName.FIGHTER,
+        ClassName.MAGIC_USER,
+        ClassName.THIEF,
+    }
+
+    assert set(SAVING_THROWS.keys()) == expected
 
 
 def test_all_levels_present():
+    expected_levels = set(range(1, 21))
+
     for class_data in SAVING_THROWS.values():
-        assert set(class_data.keys()) == EXPECTED_LEVELS
+        assert set(class_data.keys()) == expected_levels
 
 
-def test_all_fields_present():
+def test_values_are_saving_throw_data():
     for class_data in SAVING_THROWS.values():
-        for level_data in class_data.values():
-            assert set(level_data.keys()) == {
-                "death_ray_or_poison",
-                "magic_wands",
-                "paralysis_or_petrify",
-                "dragon_breath",
-                "spells",
-            }
+        for value in class_data.values():
+            assert isinstance(value, SavingThrowData)
 
 
-def test_values_are_ints():
-    for class_data in SAVING_THROWS.values():
-        for level_data in class_data.values():
-            for value in level_data.values():
-                assert isinstance(value, int)
-
-
-def test_values_are_reasonable():
-    for class_data in SAVING_THROWS.values():
-        for level_data in class_data.values():
-            for value in level_data.values():
-                assert 2 <= value <= 20
-
-
-def test_clone_saving_throws_returns_copy():
-    original = {
-        "death_ray_or_poison": 12,
-        "magic_wands": 13,
-        "paralysis_or_petrify": 14,
-        "dragon_breath": 15,
-        "spells": 16,
+def test_race_modifiers_present():
+    expected = {
+        Race.DWARF,
+        Race.ELF,
+        Race.HALFLING,
+        Race.HUMAN,
     }
 
-    cloned = clone_saving_throws(original)
-
-    # Not the same object
-    assert cloned is not original
-
-    # Same values
-    assert cloned == original
+    assert set(SAVING_THROW_MODIFIERS.keys()) == expected
 
 
-def test_clone_saving_throws_does_not_mutate_original():
-    original = {
-        "death_ray_or_poison": 12,
-        "magic_wands": 13,
-        "paralysis_or_petrify": 14,
-        "dragon_breath": 15,
-        "spells": 16,
-    }
+# ----------------------------
+# get_saving_throws (happy path)
+# ----------------------------
 
-    cloned = clone_saving_throws(original)
+def test_get_saving_throws_human_no_modifier():
+    result = get_saving_throws(ClassName.CLERIC, Race.HUMAN, 1)
 
-    # Mutate the clone
-    cloned["spells"] = 99
+    base = SAVING_THROWS[ClassName.CLERIC][1]
 
-    # Original should remain unchanged
-    assert original["spells"] == 16
+    assert result == base
+
+
+def test_get_saving_throws_with_modifier():
+    result = get_saving_throws(ClassName.CLERIC, Race.DWARF, 1)
+
+    base = SAVING_THROWS[ClassName.CLERIC][1]
+    mod = SAVING_THROW_MODIFIERS[Race.DWARF]
+
+    expected = base.add(mod)
+
+    assert result == expected
+
+
+# ----------------------------
+# Validation errors
+# ----------------------------
+
+def test_invalid_class_raises():
+    class FakeClass:
+        pass
+
+    with pytest.raises(ValueError) as exc:
+        get_saving_throws(FakeClass(), Race.HUMAN, 1)
+
+    assert "Invalid class" in str(exc.value)
+
+
+def test_invalid_race_raises():
+    class FakeRace:
+        pass
+
+    with pytest.raises(ValueError) as exc:
+        get_saving_throws(ClassName.CLERIC, FakeRace(), 1)
+
+    assert "Invalid race" in str(exc.value)
+
+
+def test_invalid_level_raises():
+    with pytest.raises(ValueError) as exc:
+        get_saving_throws(ClassName.CLERIC, Race.HUMAN, 999)
+
+    assert "Invalid level" in str(exc.value)
