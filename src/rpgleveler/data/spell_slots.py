@@ -168,8 +168,9 @@ def get_spell_slots(class_name: ClassName, level: int) -> SpellSlots:
         >>> get_spell_slots(ClassName.MAGIC_USER, 3)
         SpellSlots(level_1=2, level_2=1, level_3=0, level_4=0, level_5=0)
     """
-    try:
-        return SPELL_SLOTS[class_name][level]
-    except KeyError:
-        err_msg = f"Invalid class/level combination: {class_name}, {level}"
-        raise ValueError(err_msg)
+    if class_name not in SPELL_SLOTS:
+        raise ValueError(f"Invalid class: {class_name}")
+    if level not in SPELL_SLOTS[class_name]:
+        raise ValueError(f"Invalid level: {level}")
+
+    return SPELL_SLOTS[class_name][level]

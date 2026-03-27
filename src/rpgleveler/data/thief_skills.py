@@ -1,5 +1,44 @@
 """
-TODO: add comments...
+Thief skill progression tables for Basic Fantasy RPG.
+
+This module defines the percentage chances for each thief skill at each level.
+The data is derived directly from the official Basic Fantasy RPG class
+progression tables.
+
+Structure:
+    THIEF_SKILLS[class_name][level] -> ThiefSkills
+
+Where:
+    - class_name is a `ClassName` enum
+    - level is the character level (int)
+    - `ThiefSkills` contains percentage values for all thief abilities
+
+Thief skills:
+    - open_locks: Chance to open locked doors and containers
+    - pick_pockets: Chance to steal items unnoticed
+    - find_traps: Chance to detect traps
+    - remove_traps: Chance to safely disarm traps
+    - move_silently: Chance to move without making noise
+    - climb_walls: Chance to successfully climb vertical surfaces
+    - hide_in_shadows: Chance to remain unseen in shadows
+    - hear_noise: Chance to detect faint sounds
+
+Notes:
+    - Values represent percentage chances (0–100).
+    - Some skills may exceed 100% at higher levels.
+    - Non-thief classes have no access to these abilities (all values are zero).
+    - Data is treated as immutable game rules.
+
+Implementation details:
+    - Raw data is defined in mutable dictionaries for readability.
+    - Data is wrapped using `MappingProxyType` to enforce runtime immutability.
+    - `ThiefSkills` is a frozen dataclass, ensuring values cannot be modified.
+    - Consumers should use `get_thief_skills()` rather than accessing tables
+      directly.
+
+Example:
+    >>> get_thief_skills(ClassName.THIEF, 5)
+    ThiefSkills(open_locks=45, pick_pockets=50, ...)
 """
 
 from __future__ import annotations
@@ -13,7 +52,22 @@ from rpgleveler.shared import ClassName
 
 @dataclass(frozen=True)
 class ThiefSkills:
-    """TODO: add comments..."""
+    """
+    Immutable container for thief skill percentages.
+
+    Each field represents the percentage chance of success for a specific thief
+    ability.
+
+    Attributes:
+        open_locks: Chance to open locked objects
+        pick_pockets: Chance to steal items unnoticed
+        find_traps: Chance to detect traps
+        remove_traps: Chance to disarm traps
+        move_silently: Chance to move quietly
+        climb_walls: Chance to climb surfaces
+        hide_in_shadows: Chance to remain hidden
+        hear_noise: Chance to detect faint sounds
+    """
     open_locks: int
     pick_pockets: int
     find_traps: int
@@ -25,17 +79,17 @@ class ThiefSkills:
 
 
 type ThiefSkillsByLevel = dict[int, ThiefSkills]
-"""TODO: add comments..."""
+"""Mapping of level → thief skill data."""
 
 
-type ThiefSkillsByClass = dict[ClassName, ThiefSkillsByLevel]
-"""TODO: add comments..."""
+type ThiefSkillsByClassName = dict[ClassName, ThiefSkillsByLevel]
+"""Mapping of class → level-based thief skill progression."""
 
 
 # Thief skill progression table.
 # Values are derived from Basic Fantasy RPG class tables.
 # This data is treated as immutable game rules.
-_raw_thief_skills: Final[ThiefSkillsByClass] = {
+_raw_thief_skills: Final[ThiefSkillsByClassName] = {
     ClassName.CLERIC: {
         lvl: ThiefSkills(0,0,0,0,0,0,0,0) for lvl in range(1, 21)
     },
@@ -70,26 +124,53 @@ _raw_thief_skills: Final[ThiefSkillsByClass] = {
 }
 
 
-def _freeze(data: ThiefSkillsByClass
+def _freeze(data: ThiefSkillsByClassName
 ) -> MappingProxyType[ClassName, MappingProxyType[int, ThiefSkills]]:
     """
-    TODO: add comments
+    Convert nested thief skill data into immutable mappings.
+
+    Both the outer mapping (class → levels) and inner mappings (level → skills)
+    are wrapped in `MappingProxyType` to prevent modification at runtime.
+
+    Args:
+        data: Mutable thief skill data.
+
+    Returns:
+        A fully read-only nested mapping structure.
     """
     return MappingProxyType({
         cls: MappingProxyType(levels) for cls, levels in data.items()
     })
 
 
-# Public, immutable spell slots table.
+# Public, immutable thief skills table.
 THIEF_SKILLS = _freeze(_raw_thief_skills)
 
 
 def get_thief_skills(class_name: ClassName, level: int) -> ThiefSkills:
     """
-    TODO: add comments
+    Retrieve thief skill values for a given class and level.
+
+    This function provides a safe access layer over the thief skill table,
+    ensuring invalid inputs are handled consistently.
+
+    Args:
+        class_name: The character class.
+        level: The character level (1–20).
+
+    Returns:
+        A `ThiefSkills` instance representing skill percentages.
+
+    Raises:
+        ValueError: If the class or level is not present in the table.
+
+    Example:
+        >>> get_thief_skills(ClassName.THIEF, 1)
+        ThiefSkills(open_locks=25, pick_pockets=30, ...)
     """
-    try:
-        return THIEF_SKILLS[class_name][level]
-    except KeyError:
-        err_msg = f"Invalid class/level combination: {class_name}, {level}"
-        raise ValueError(err_msg)
+    if class_name not in THIEF_SKILLS:
+        raise ValueError(f"Invalid class: {class_name}")
+    if level not in THIEF_SKILLS[class_name]:
+        raise ValueError(f"Invalid level: {level}")
+
+    return THIEF_SKILLS[class_name][level]

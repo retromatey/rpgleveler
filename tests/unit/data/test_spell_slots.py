@@ -129,11 +129,11 @@ def test_get_spell_slots_invalid_class():
     with pytest.raises(ValueError) as exc:
         get_spell_slots(FakeClass(), 1)
 
-    assert "Invalid class/level combination" in str(exc.value)
+    assert "Invalid class" in str(exc.value)
 
 
 def test_get_spell_slots_invalid_level():
     with pytest.raises(ValueError) as exc:
         get_spell_slots(ClassName.CLERIC, 999)
 
-    assert "Invalid class/level combination" in str(exc.value)
+    assert "Invalid level" in str(exc.value)
