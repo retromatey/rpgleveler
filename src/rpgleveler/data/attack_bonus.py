@@ -1,26 +1,11 @@
 """
-Attack bonus progression tables for Basic Fantasy RPG.
-
-This module defines the attack bonus for each class at each level.  The data is
-derived directly from the official Basic Fantasy RPG class progression tables.
-
-Structure:
-    ATTACK_BONUS[class_name][level] -> attack_bonus
-
-Where:
-    - class_name is a ClassName enum
-    - level is the character level (int)
-    - attack_bonus is the base bonus applied to attack rolls
-
-Notes:
-    - Attack bonus progression varies by class.
-    - Values increase stepwise according to class tables.
-    - The data is static and should not be modified at runtime.
+TODO: add comments
 """
 
 from __future__ import annotations
 
-from typing import Final
+from types import MappingProxyType
+from typing import Final, cast
 
 from rpgleveler.shared import ClassName
 
@@ -35,7 +20,7 @@ type AttackBonusByClassName = dict[ClassName, AttackBonusByLevel]
 # Attack bonus progression tables keyed by class name.
 # Values are derived from Basic Fantasy RPG class tables.
 # This data is treated as immutable game rules.
-ATTACK_BONUS: Final[AttackBonusByClassName] = {
+_raw_attack_bonus: Final[AttackBonusByClassName] = {
     ClassName.CLERIC: {
         1: 1,
         2: 2,
@@ -125,3 +110,27 @@ ATTACK_BONUS: Final[AttackBonusByClassName] = {
         20: 11,
     },
 }
+
+
+def _freeze(data: AttackBonusByClassName
+) -> MappingProxyType[ClassName, MappingProxyType[int, int]]:
+    """
+    TODO: add comments
+    """
+    return MappingProxyType({
+        cls: MappingProxyType(levels) for cls, levels in data.items()
+    })
+
+
+ATTACK_BONUS = _freeze(_raw_attack_bonus)
+
+
+def get_attack_bonus(class_name: ClassName, level: int) -> int:
+    """
+    TODO: add comments
+    """
+    try:
+        return cast(int, ATTACK_BONUS[class_name][level])
+    except KeyError:
+        err_msg = f"Invalid class/level combination: {class_name}, {level}"
+        raise ValueError(err_msg)
