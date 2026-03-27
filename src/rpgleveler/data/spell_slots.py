@@ -1,5 +1,35 @@
 """
-TODO: add comments here...
+Spell slot progression tables for Basic Fantasy RPG.
+
+This module defines the number of spell slots available to each character class
+at each level. The data is derived directly from the official Basic Fantasy RPG
+class progression tables.
+
+Structure:
+    SPELL_SLOTS[class_name][level] -> SpellSlots
+
+Where:
+    - class_name is a `ClassName` enum
+    - level is the character level (int)
+    - `SpellSlots` contains the number of available slots for spell levels 1–5
+
+Spell slot format:
+    SpellSlots(level_1, level_2, level_3, level_4, level_5)
+
+Notes:
+    - Spellcasting progression varies by class.
+    - Clerics begin spellcasting at level 2.
+    - Non-spellcasting classes (e.g., fighter, thief) have zero spell slots.
+    - All data is treated as immutable game rules.
+
+Implementation details:
+    - Raw data is defined in mutable dictionaries for readability.
+    - Data is wrapped using `MappingProxyType` to enforce runtime immutability.
+    - `SpellSlots` is a frozen dataclass, ensuring values cannot be modified.
+
+Example:
+    >>> get_spell_slots(ClassName.CLERIC, 5)
+    SpellSlots(level_1=2, level_2=2, level_3=0, level_4=0, level_5=0)
 """
 
 from __future__ import annotations
@@ -13,7 +43,19 @@ from rpgleveler.shared import ClassName
 
 @dataclass(frozen=True)
 class SpellSlots:
-    """Represents spell slots for levels 1-5."""
+    """
+    Immutable container for spell slot counts.
+
+    Each field represents the number of available spell slots for a given spell
+    level.
+
+    Attributes:
+        level_1: Number of level 1 spell slots
+        level_2: Number of level 2 spell slots
+        level_3: Number of level 3 spell slots
+        level_4: Number of level 4 spell slots
+        level_5: Number of level 5 spell slots
+    """
     level_1: int
     level_2: int
     level_3: int
@@ -22,11 +64,11 @@ class SpellSlots:
 
 
 type SpellSlotsByLevel = dict[int, SpellSlots]
-"""Mapping of character level to spell slot progression."""
+"""Mapping of level → spell slot data."""
 
 
 type SpellSlotsByClassName = dict[ClassName, SpellSlotsByLevel]
-"""Mapping of spells slots to class names."""
+"""Mapping of class → level-based spell slot progression."""
 
 
 # Spell slot progression tables keyed by class name.
@@ -85,7 +127,16 @@ _raw_spell_slots: Final[SpellSlotsByClassName] = {
 def _freeze(data: SpellSlotsByClassName 
 ) -> MappingProxyType[ClassName, MappingProxyType[int, SpellSlots]]:
     """
-    TODO: add comments
+    Convert nested spell slot data into immutable mappings.
+
+    Both the outer mapping (class → levels) and inner mappings (level → slots)
+    are wrapped in `MappingProxyType` to prevent modification at runtime.
+
+    Args:
+        data: Mutable spell slot data.
+
+    Returns:
+        A fully read-only nested mapping structure.
     """
     return MappingProxyType({
         cls: MappingProxyType(levels) for cls, levels in data.items()
@@ -98,7 +149,24 @@ SPELL_SLOTS = _freeze(_raw_spell_slots)
 
 def get_spell_slots(class_name: ClassName, level: int) -> SpellSlots:
     """
-    TODO: add comments...
+    Retrieve the spell slots for a given class and level.
+
+    This function provides a safe access layer over the spell slot table,
+    ensuring invalid inputs are handled consistently.
+
+    Args:
+        class_name: The character class.
+        level: The character level (1–20).
+
+    Returns:
+        A `SpellSlots` instance representing available spell slots.
+
+    Raises:
+        ValueError: If the class or level is not present in the table.
+
+    Example:
+        >>> get_spell_slots(ClassName.MAGIC_USER, 3)
+        SpellSlots(level_1=2, level_2=1, level_3=0, level_4=0, level_5=0)
     """
     try:
         return SPELL_SLOTS[class_name][level]
