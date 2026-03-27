@@ -35,7 +35,7 @@ from typing import Final
 from rpgleveler.shared import ClassName, Race
 
 
-@dataclass
+@dataclass(frozen=True)
 class SavingThrowData:
     """Container for saving throws categories in Basic Fantasy.
 
@@ -51,6 +51,15 @@ class SavingThrowData:
     paralysis_or_petrify: int
     dragon_breath: int
     spells: int
+
+    def add(self, other: SavingThrowData) -> SavingThrowData:
+        return SavingThrowData(
+            death_ray_or_poison=self.death_ray_or_poison + other.death_ray_or_poison,
+            magic_wands=self.magic_wands + other.magic_wands,
+            paralysis_or_petrify=self.paralysis_or_petrify + other.paralysis_or_petrify,
+            dragon_breath=self.dragon_breath + other.dragon_breath,
+            spells=self.spells + other.spells,
+        )
 
 
 type SavingThrowsByLevel = dict[int, SavingThrowData]
@@ -204,9 +213,7 @@ def _freeze_class_saving_throws(data: SavingThrowsByClassName
 
 def _freeze_race_modifiers(data: SavingThrowsByRace
 ) -> MappingProxyType[Race, SavingThrowData]:
-    return MappingProxyType({
-        race: st_data for race, st_data in data.items()
-    })
+    return MappingProxyType(data)
 
 
 # Public, immutable saving throws table (by class).
@@ -222,22 +229,14 @@ def get_saving_throws(
     race: Race, 
     level: int) -> SavingThrowData:
     try:
+        if class_name not in SAVING_THROWS:
+            raise ValueError(f"Invalid class: {class_name}")
+        if race not in SAVING_THROW_MODIFIERS:
+            raise ValueError(f"Invalid race: {race}")
+        if level not in SAVING_THROWS[class_name]:
+            raise ValueError(f"Invalid level: {level}")
         saving_throws = SAVING_THROWS[class_name][level]
         modifiers = SAVING_THROW_MODIFIERS[race]
-
-        death_ray_or_poison = saving_throws.death_ray_or_poison + modifiers.death_ray_or_poison
-        magic_wands = saving_throws.magic_wands + modifiers.magic_wands
-        paralysis_or_petrify = saving_throws.paralysis_or_petrify + modifiers.paralysis_or_petrify
-        dragon_breath = saving_throws.dragon_breath + modifiers.dragon_breath
-        spells = saving_throws.spells + modifiers.spells
-
-        return SavingThrowData(
-            death_ray_or_poison=death_ray_or_poison,
-            magic_wands=magic_wands,
-            paralysis_or_petrify=paralysis_or_petrify,
-            dragon_breath=dragon_breath,
-            spells=spells
-        )
-    except KeyError:
-        err_msg = f"Invalid class/race/level combination: {class_name}, {race}, {level}"
-        raise ValueError(err_msg)
+        return saving_throws.add(modifiers)
+    except ValueError:
+        raise
