@@ -128,13 +128,13 @@ _raw_turn_undead: Final[TurnUndeadByClassName] = {
         20: TurnUndead(skeleton="D", zombie="D", ghoul="D",  wight="D",  wraith="D",  mummy="D",  spectre="T",  vampire=3),
     },
     ClassName.FIGHTER: {
-        lvl: TurnUndead(None,None,None,None,None,None,None,None) for lvl in range(0, 21) 
+        lvl: TurnUndead(*(None,)*8) for lvl in range(1, 21) 
     },
     ClassName.MAGIC_USER: {
-        lvl: TurnUndead(None,None,None,None,None,None,None,None) for lvl in range(0, 21) 
+        lvl: TurnUndead(*(None,)*8) for lvl in range(1, 21) 
     },
     ClassName.THIEF: {
-        lvl: TurnUndead(None,None,None,None,None,None,None,None) for lvl in range(0, 21) 
+        lvl: TurnUndead(*(None,)*8) for lvl in range(1, 21) 
     },
 }
 
