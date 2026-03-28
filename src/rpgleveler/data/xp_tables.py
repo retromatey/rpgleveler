@@ -1,40 +1,25 @@
-"""
-Experience point (XP) progression tables for Basic Fantasy RPG.
-
-This module defines the XP thresholds required for each class to reach a given
-level. The data is derived directly from the official Basic Fantasy RPG class
-progression tables.
-
-Structure:
-    XP_TABLE[class_name][level] -> xp_required
-
-Where:
-    - class_name is a ClassName literal (e.g., "fighter", "cleric")
-    - level is the target character level (int)
-    - xp_required is the minimum XP needed to attain that level
-
-Notes:
-    - Level 1 always starts at 0 XP.
-    - XP thresholds are cumulative (not incremental).
-    - All classes use independent progression tables.
-    - The data is static and should not be modified at runtime.
-"""
+"""TODO add comment"""
 
 from __future__ import annotations
 
+from types import MappingProxyType
 from typing import Final
 
-from rpgleveler.shared.literals import ClassName
+from rpgleveler.shared import ClassName
 
-# Mapping of character level to required XP.
 type XPByLevel = dict[int, int]
+"""TODO add comment"""
+
+
+type XPByClassName = dict[ClassName, XPByLevel]
+"""TODO add comment"""
 
 
 # XP progression tables keyed by class name.
 # Values are derived from Basic Fantasy RPG class tables.
 # This data is treated as immutable game rules.
-XP_TABLES: Final[dict[ClassName, XPByLevel]] = {
-    "cleric": {
+_raw_xp_tables: Final[XPByClassName] = {
+    ClassName.CLERIC: {
         1: 0,
         2: 1500,
         3: 3000,
@@ -56,7 +41,7 @@ XP_TABLES: Final[dict[ClassName, XPByLevel]] = {
         19: 2475000,
         20: 2700000,
     },
-    "fighter": {
+    ClassName.FIGHTER: {
         1: 0,
         2: 2000,
         3: 4000,
@@ -78,7 +63,7 @@ XP_TABLES: Final[dict[ClassName, XPByLevel]] = {
         19: 1440000,
         20: 1560000,
     },
-    "magic-user": {
+    ClassName.MAGIC_USER: {
         1: 0,
         2: 2500,
         3: 5000,
@@ -100,7 +85,7 @@ XP_TABLES: Final[dict[ClassName, XPByLevel]] = {
         19: 1800000,
         20: 1950000,
     },
-    "thief": {
+    ClassName.THIEF: {
         1: 0,
         2: 1250,
         3: 2500,
@@ -123,3 +108,29 @@ XP_TABLES: Final[dict[ClassName, XPByLevel]] = {
         20: 910000,
     },
 }
+
+
+def _freeze(data: XPByClassName
+) -> MappingProxyType[ClassName, MappingProxyType[int, int]]:
+    """
+    TODO: add comments
+    """
+    return MappingProxyType({
+        cls: MappingProxyType(levels) for cls, levels in data.items()
+    })
+
+
+# Public, immutable xp tables.
+XP_TABLES = _freeze(_raw_xp_tables)
+
+
+def get_xp_requirement(class_name: ClassName, level: int) -> int:
+    """
+    TODO: add comments
+    """
+    if class_name not in XP_TABLES:
+        raise ValueError(f"Invalid class: {class_name}")
+    if level not in XP_TABLES[class_name]:
+        raise ValueError(f"Invalid level: {level}")
+
+    return XP_TABLES[class_name][level]
