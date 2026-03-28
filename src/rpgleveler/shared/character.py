@@ -1,13 +1,13 @@
 from dataclasses import dataclass
 from typing import Any
 
+from rpgleveler.core import ClassName, Race
 from rpgleveler.data import (
     SavingThrowData,
     SpellSlots,
     ThiefSkills,
     TurnUndead,
 )
-from rpgleveler.core import ClassName, Race
 
 
 @dataclass
@@ -130,8 +130,8 @@ class Character:
         """
         return {
             "name": self.name,
-            "race": self.race,
-            "class": self.class_name,
+            "race": self.race.value,
+            "class": self.class_name.value,
             "level": self.level,
             "xp": self.xp,
             "abilities": vars(self.abilities),
@@ -139,11 +139,31 @@ class Character:
             "hp": self.hp,
             "ac": self.ac,
             "attack_bonus": self.attack_bonus,
-            "saving_throws": self.saving_throws,
-            "spell_slots": self.spell_slots,
-            "thief_skills": self.thief_skills,
-            "turn_undead": self.turn_undead,
+            "saving_throws": self.saving_throws.to_dict(),
+            "spell_slots": self.spell_slots.to_dict(),
+            "thief_skills": self.thief_skills.to_dict(),
+            "turn_undead": self.turn_undead.to_dict(),
             "money_gp": self.money_gp,
             "inventory": self.inventory,
         }
-        # TODO: the data objects might need thier own to_dict functions
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> Character:
+        return cls(
+            name=data["name"],
+            race=Race(data["race"]),
+            class_name=ClassName(data["class"]),
+            level=data["level"],
+            xp=data["xp"],
+            abilities=AbilityScores(**data["abilities"]),
+            ability_mods=data["ability_mods"],
+            hp=data["hp"],
+            ac=data["ac"],
+            attack_bonus=data["attack_bonus"],
+            saving_throws=SavingThrowData.from_dict(data["saving_throws"]),
+            spell_slots=SpellSlots.from_dict(data["spell_slots"]),
+            thief_skills=ThiefSkills.from_dict(data["thief_skills"]),
+            turn_undead=TurnUndead.from_dict(data["turn_undead"]),
+            money_gp=data["money_gp"],
+            inventory=data["inventory"],
+        )

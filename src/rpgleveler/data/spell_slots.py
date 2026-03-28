@@ -62,6 +62,13 @@ class SpellSlots:
     level_4: int
     level_5: int
 
+    def to_dict(self) -> dict[str, int]:
+        return vars(self)
+    
+    @classmethod
+    def from_dict(cls, data: dict[str, int]) -> SpellSlots:
+        return cls(**data)
+
 
 type SpellSlotsByLevel = dict[int, SpellSlots]
 """Mapping of level → spell slot data."""

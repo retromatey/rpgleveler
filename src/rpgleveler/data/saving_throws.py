@@ -92,6 +92,13 @@ class SavingThrowData:
             spells=self.spells + other.spells,
         )
 
+    def to_dict(self) -> dict[str, int]:
+        return vars(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, int]) -> SavingThrowData:
+        return cls(**data)
+
 
 type SavingThrowsByLevel = dict[int, SavingThrowData]
 """Mapping of level → saving throw values."""

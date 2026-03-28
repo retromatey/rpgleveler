@@ -92,6 +92,13 @@ class TurnUndead:
     spectre: TurnResult
     vampire: TurnResult
 
+    def to_dict(self) -> dict[str, int | str | None]:
+        return vars(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, int | str | None]) -> TurnUndead:
+        return cls(**data)
+
 
 type TurnUndeadByLevel = dict[int, TurnUndead]
 """Mapping of level → turn undead data."""

@@ -77,6 +77,13 @@ class ThiefSkills:
     hide_in_shadows: int
     hear_noise: int
 
+    def to_dict(self) -> dict[str: int]:
+        return vars(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, int]) -> ThiefSkills:
+        return cls(**data)
+
 
 type ThiefSkillsByLevel = dict[int, ThiefSkills]
 """Mapping of level → thief skill data."""
