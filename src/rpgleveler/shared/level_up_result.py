@@ -1,10 +1,13 @@
 from dataclasses import dataclass
 
-from rpgleveler.data.saving_throws import SavingThrowData
-from rpgleveler.data.spell_slots import SpellSlotRow
-from rpgleveler.data.thief_skills import ThiefSkillData
-from rpgleveler.data.turn_undead import TurnUndeadData
-from rpgleveler.shared.literals import ClassName
+from rpgleveler.data (
+    SavingThrowData,
+    SpellSlots,
+    ThiefSkills,
+    TurnUndead,
+)
+from class_names import ClassName
+from races import Race
 
 
 @dataclass
@@ -22,6 +25,9 @@ class LevelUpResult:
     Attributes:
         class_name:
             The character's class.
+
+        race:
+            The character's race.
 
         old_level:
             The character's level before leveling up.
@@ -61,6 +67,7 @@ class LevelUpResult:
     """
 
     class_name: ClassName
+    race: Race
     old_level: int
     new_level: int
 
@@ -70,7 +77,6 @@ class LevelUpResult:
     new_attack_bonus: int
     saving_throws: SavingThrowData
 
-    # Optional class-specific changes
-    new_spell_slots: SpellSlotRow | None = None
-    thief_skills: ThiefSkillData | None = None
-    turn_undead: TurnUndeadData | None = None
+    new_spell_slots: SpellSlots = SpellSlots(0,0,0,0,0)
+    thief_skills: ThiefSkills = ThiefSkills(0,0,0,0,0,0,0,0)
+    turn_undead: TurnUndead = TurnUndead(*(None,)*8)

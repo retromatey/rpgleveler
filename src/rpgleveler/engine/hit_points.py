@@ -19,7 +19,7 @@ Notes:
 """
 from diceroller.core import DiceRoller
 
-from rpgleveler.shared.character import Character
+from rpgleveler.shared import Character
 
 
 def roll_hp_gain(character: Character, rng: DiceRoller) -> int:

@@ -1,11 +1,14 @@
 from dataclasses import dataclass
 from typing import Any
 
-from rpgleveler.data.saving_throws import SavingThrowData
-from rpgleveler.data.spell_slots import SpellSlotRow
-from rpgleveler.data.thief_skills import ThiefSkillData
-from rpgleveler.data.turn_undead import TurnUndeadData
-from rpgleveler.shared.literals import ClassName, RaceName
+from rpgleveler.data (
+    SavingThrowData,
+    SpellSlots,
+    ThiefSkills,
+    TurnUndead,
+)
+from class_names import ClassName
+from races import Race
 
 
 @dataclass
@@ -105,9 +108,9 @@ class Character:
     race: RaceName
     saving_throws: SavingThrowData
     xp: int
-    spell_slots: SpellSlotRow | None = None
-    thief_skills: ThiefSkillData | None = None
-    turn_undead: TurnUndeadData | None = None
+    spell_slots: SpellSlots = SpellSlots(0,0,0,0,0)
+    thief_skills: ThiefSkills = ThiefSkills(0,0,0,0,0,0,0,0)
+    turn_undead: TurnUndead = TurnUndead(*(None,)*8)
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize the character to a JSON-friendly dictionary.
@@ -134,3 +137,4 @@ class Character:
             "money_gp": self.money_gp,
             "inventory": self.inventory,
         }
+        # TODO: the data objects might need thier own to_dict functions

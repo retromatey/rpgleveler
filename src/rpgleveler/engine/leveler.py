@@ -31,13 +31,21 @@ from dataclasses import replace
 
 from diceroller.core import DiceRoller
 
-from rpgleveler.data.saving_throws import SavingThrowData
-from rpgleveler.data.spell_slots import SpellSlotRow
-from rpgleveler.data.thief_skills import ThiefSkillData
-from rpgleveler.data.turn_undead import TurnUndeadData
-from rpgleveler.engine.advancement import can_level_up
-from rpgleveler.engine.hit_points import roll_hp_gain
-from rpgleveler.engine.progression import (
+from rpgleveler.data (
+    SavingThrowData,
+    SpellSlots,
+    ThiefSkills,
+    TurnUndead,
+)
+from rpgleveler.shared import (
+    ClassName, 
+    Race,
+    Character,
+    LevelUpResult,
+)
+from advancement import can_level_up
+from hit_points import roll_hp_gain
+from progression import (
     apply_saving_throw_modifiers,
     get_attack_bonus,
     get_saving_throws,
@@ -45,8 +53,6 @@ from rpgleveler.engine.progression import (
     get_thief_skills,
     get_turn_undead,
 )
-from rpgleveler.shared.character import Character
-from rpgleveler.shared.level_up_result import LevelUpResult
 
 
 class LevelUpError(Exception):
@@ -154,9 +160,9 @@ def _build_new_character(
     new_hp_total: int,
     new_attack_bonus: int,
     saving_throws: SavingThrowData,
-    new_spell_slots: SpellSlotRow | None,
-    thief_skills: ThiefSkillData | None,
-    turn_undead: TurnUndeadData | None
+    new_spell_slots: SpellSlots,
+    thief_skills: ThiefSkills,
+    turn_undead: TurnUndead
 ) -> Character:
     """
     Construct a new Character instance with updated level-up values.
