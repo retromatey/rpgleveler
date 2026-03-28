@@ -8,7 +8,7 @@ from rpgleveler.data.spell_slots import (
     _freeze,
     get_spell_slots,
 )
-from rpgleveler.shared import ClassName
+from rpgleveler.core import ClassName
 
 # ----------------------------
 # SpellSlots dataclass

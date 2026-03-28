@@ -35,7 +35,7 @@ from rpgleveler.data import (
     ThiefSkills,
     TurnUndead,
 )
-from rpgleveler.shared import ClassName, Race
+from rpgleveler.core import ClassName, Race
 
 
 def get_attack_bonus(class_name: ClassName, level: int) -> int:

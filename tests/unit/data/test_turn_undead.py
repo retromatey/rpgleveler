@@ -8,7 +8,7 @@ from rpgleveler.data.turn_undead import (
     _freeze,
     get_turn_undead,
 )
-from rpgleveler.shared import ClassName
+from rpgleveler.core import ClassName
 
 # ----------------------------
 # Dataclass

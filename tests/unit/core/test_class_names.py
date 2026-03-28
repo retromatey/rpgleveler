@@ -1,6 +1,6 @@
 import pytest
 
-from rpgleveler.shared import ClassName, parse_class_name
+from rpgleveler.core import ClassName, parse_class_name
 
 
 def test_enum_values():

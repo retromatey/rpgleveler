@@ -8,7 +8,7 @@ from rpgleveler.data.thief_skills import (
     _freeze,
     get_thief_skills,
 )
-from rpgleveler.shared import ClassName
+from rpgleveler.core import ClassName
 
 # ----------------------------
 # ThiefSkills dataclass

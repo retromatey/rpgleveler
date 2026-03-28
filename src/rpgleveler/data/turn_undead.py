@@ -54,7 +54,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Final, Literal
 
-from rpgleveler.shared import ClassName
+from rpgleveler.core import ClassName
 
 # Special turn undead result values.
 type TurnResult = int | Literal["T", "D"] | None

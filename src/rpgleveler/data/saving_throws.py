@@ -48,7 +48,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Final
 
-from rpgleveler.shared import ClassName, Race
+from rpgleveler.core import ClassName, Race
 
 
 @dataclass(frozen=True)

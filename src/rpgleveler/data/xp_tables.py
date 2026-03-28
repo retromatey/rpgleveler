@@ -35,7 +35,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Final
 
-from rpgleveler.shared import ClassName
+from rpgleveler.core import ClassName
 
 type XPByLevel = dict[int, int]
 """Mapping of level → cumulative XP required."""

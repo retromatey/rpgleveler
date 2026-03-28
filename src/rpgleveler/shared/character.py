@@ -1,19 +1,21 @@
 from dataclasses import dataclass
 from typing import Any
 
-from rpgleveler.data (
+from rpgleveler.data import (
     SavingThrowData,
     SpellSlots,
     ThiefSkills,
     TurnUndead,
 )
-from class_names import ClassName
-from races import Race
+from rpgleveler.core import ClassName, Race
 
 
 @dataclass
 class AbilityScores:
     """Container for the six Basic Fantasy ability scores.
+
+    This structure holds the raw ability values for a character. These scores
+    are used to derive modifiers and influence various gameplay mechanics.
 
     Attributes:
         CHA: Charisma score.
@@ -23,7 +25,6 @@ class AbilityScores:
         STR: Strength score.
         WIS: Wisdom score.
     """
-
     CHA: int
     CON: int
     DEX: int
@@ -34,67 +35,71 @@ class AbilityScores:
 
 @dataclass
 class Character:
-    """Represent a fully generated level-1 character.
+    """Represents a character's complete game state at a given level.
 
-    The object contains the character's rolled abilities along with all derived
-    statistics such as hit points, armor class, attack bonus, saving throws, and
-    starting wealth.
+    This object is the authoritative snapshot of a character, containing both
+    base attributes (such as ability scores) and all derived statistics (such as
+    hit points, attack bonus, and saving throws).
+
+    The design intentionally avoids optional or class-specific fields. All
+    characters possess the same set of attributes, with non-applicable features
+    represented by default or neutral values (e.g., zeroed spell slots).
+
+    This approach simplifies downstream logic by eliminating the need for
+    conditional checks based on class.
 
     Attributes:
-        abilities: 
-            Rolled or assigned ability scores.
+        abilities:
+            The character's raw ability scores.
 
-        ability_mods: 
-            Ability modifiers keyed by ability name.
+        ability_mods:
+            Ability modifiers keyed by ability name (e.g., "STR", "DEX").
 
-        ac: 
-            Final armor class value at the current state.
+        ac:
+            Armor Class at the current state.
 
-        attack_bonus: 
+        attack_bonus:
             Attack bonus applied to attack rolls.
 
-        class_name: 
-            Normalized class name (lowercase).
+        class_name:
+            Canonical lowercase class identifier.
 
-        hp: 
+        hp:
             Current hit points.
 
-        inventory: 
-            Carried items as display names.
+        inventory:
+            List of carried item names.
 
-        level: 
-            Character level.
+        level:
+            Current character level.
 
-        money_gp: 
+        money_gp:
             Current wealth in gold pieces.
 
-        name: 
+        name:
             Optional character name.
 
-        race: 
-            Normalized race name (lowercase).
+        race:
+            Canonical race identifier.
 
-        saving_throws: 
-            Saving throw targets keyed by saving throw name.
+        saving_throws:
+            Saving throw targets keyed by saving throw category.
 
         xp:
-            Amount of experience points the character currently has.
+            Total accumulated experience points.
 
         spell_slots:
-            Available spell slots by spell level for spellcasting classes.
-            Represented as a fixed-length tuple of integers (levels 1–5).  None
-            for non-spellcasting classes.
+            Spell slots available by spell level (levels 1–5).
+            Non-spellcasting classes have all values set to zero.
 
         thief_skills:
-            Percentage chances for each thief skill.
-            Populated only for thief characters; None for other classes.
+            Percentile values for thief abilities.
+            Non-thief classes have all values set to zero.
 
         turn_undead:
-            Turn undead effectiveness values for clerics.
-            Maps undead types to turn results (target number, "T", or "D").
-            None for non-cleric classes.
+            Turn undead effectiveness values by undead type.
+            Non-cleric classes contain only None values.
     """
-
     abilities: AbilityScores
     ability_mods: dict[str, int]
     ac: int
@@ -105,7 +110,7 @@ class Character:
     level: int
     money_gp: int
     name: str | None
-    race: RaceName
+    race: Race
     saving_throws: SavingThrowData
     xp: int
     spell_slots: SpellSlots = SpellSlots(0,0,0,0,0)
@@ -113,11 +118,15 @@ class Character:
     turn_undead: TurnUndead = TurnUndead(*(None,)*8)
 
     def to_dict(self) -> dict[str, Any]:
-        """Serialize the character to a JSON-friendly dictionary.
+        """Serialize the character into a JSON-friendly dictionary.
+
+        This method converts the Character into a structure suitable for JSON
+        encoding. Nested data structures are included as-is and may require
+        their own serialization methods.
 
         Returns:
-            dict[str, Any]: Character data including abilities, combat values,
-                money, and inventory.
+            dict[str, Any]: A dictionary containing character data, including
+                identity, progression stats, combat values, and inventory.
         """
         return {
             "name": self.name,

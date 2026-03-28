@@ -1,6 +1,6 @@
 import pytest
 
-from rpgleveler.shared import Race, parse_race
+from rpgleveler.core import Race, parse_race
 
 
 def test_enum_values():

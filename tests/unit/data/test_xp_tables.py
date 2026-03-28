@@ -7,7 +7,7 @@ from rpgleveler.data.xp_tables import (
     _freeze,
     get_xp_requirement,
 )
-from rpgleveler.shared import ClassName
+from rpgleveler.core import ClassName
 
 # ----------------------------
 # Freeze helper

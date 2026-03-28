@@ -7,7 +7,7 @@ from rpgleveler.data.attack_bonus import (
     _freeze,
     get_attack_bonus,
 )
-from rpgleveler.shared import ClassName
+from rpgleveler.core import ClassName
 
 
 def test_freeze_returns_mappingproxy():

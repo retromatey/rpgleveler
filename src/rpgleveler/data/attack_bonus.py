@@ -38,7 +38,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Final
 
-from rpgleveler.shared import ClassName
+from rpgleveler.core import ClassName
 
 # Mapping of character level to attack bonus.
 type AttackBonusByLevel = dict[int, int]

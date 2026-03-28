@@ -10,7 +10,7 @@ from rpgleveler.data.saving_throws import (
     _freeze_race_modifiers,
     get_saving_throws,
 )
-from rpgleveler.shared import ClassName, Race
+from rpgleveler.core import ClassName, Race
 
 # ----------------------------
 # SavingThrowData behavior

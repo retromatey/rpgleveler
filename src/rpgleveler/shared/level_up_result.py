@@ -1,26 +1,28 @@
 from dataclasses import dataclass
 
-from rpgleveler.data (
+from rpgleveler.data import (
     SavingThrowData,
     SpellSlots,
     ThiefSkills,
     TurnUndead,
 )
-from class_names import ClassName
-from races import Race
+from rpgleveler.core import ClassName, Race
 
 
 @dataclass
 class LevelUpResult:
-    """Represents the outcome of a character leveling up.
+    """Represents the outcome of a single level-up operation.
 
-    This data object captures all changes that occur when a character
-    advances from one level to the next. It is returned by the level-up
-    engine and provides a structured summary of updated character state.
+    This object provides a structured summary of the updated character state
+    after advancing from one level to the next. It is returned by the level-up
+    engine alongside the newly constructed Character instance.
 
-    The result includes both universal changes (such as hit points,
-    attack bonus, and saving throws) and optional class-specific updates
-    (such as spell slots or thief skills).
+    The design mirrors the Character model: all fields are always present, and
+    class-specific features are represented using neutral/default values rather
+    than being omitted.
+
+    This ensures a consistent, predictable structure for consumers such as CLI
+    output, logging, or UI rendering.
 
     Attributes:
         class_name:
@@ -30,7 +32,7 @@ class LevelUpResult:
             The character's race.
 
         old_level:
-            The character's level before leveling up.
+            The character's level prior to leveling up.
 
         new_level:
             The character's level after leveling up.
@@ -39,7 +41,7 @@ class LevelUpResult:
             The number of hit points gained during this level-up.
 
         new_hp_total:
-            The character's total hit points after leveling up.
+            The character's total hit points after applying the HP gain.
 
         new_attack_bonus:
             The updated attack bonus for the new level.
@@ -48,24 +50,23 @@ class LevelUpResult:
             The updated saving throw values for the new level.
 
         new_spell_slots:
-            Updated spell slots for spellcasting classes.
-            None for non-spellcasting classes.
+            Spell slots available at the new level.
+            Non-spellcasting classes contain zero values.
 
         thief_skills:
-            Updated thief skill percentages for thieves.
-            None for non-thief classes.
+            Thief skill percentages at the new level.
+            Non-thief classes contain zero values.
 
         turn_undead:
-            Turn undead effectiveness values for clerics.
-            Maps undead types to turn results (target number, "T", or "D").
-            None for non-cleric classes.
+            Turn undead effectiveness at the new level.
+            Non-cleric classes contain only None values.
 
     Notes:
-        - This object represents the *resulting state*, not the delta between
-          old and new values (except for hit points gained).
-        - Optional fields are only populated for relevant classes.
+        - This object represents the resulting state after leveling up,
+          not a field-by-field delta.
+        - Hit point gain is included explicitly, as it is a rolled value.
+        - All attributes are always populated to maintain a uniform data shape.
     """
-
     class_name: ClassName
     race: Race
     old_level: int

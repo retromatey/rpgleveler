@@ -5,55 +5,61 @@ This module orchestrates the process of advancing a character by one level.  It
 coordinates validation, progression lookups, hit point calculation, and
 construction of the updated character state.
 
-The level-up process is intentionally structured as a pure transformation:
-    - The input character is not modified
+The level-up process is intentionally implemented as a pure transformation:
+    - The input Character is never modified
     - A new Character instance is returned
-    - A LevelUpResult object summarizes the changes
+    - A LevelUpResult object summarizes the updated state
 
 Flow:
-    1. Validate that the character can level up
+    1. Validate that the character is eligible to level up
     2. Determine the next level
     3. Calculate hit point gain
-    4. Retrieve updated progression data
-    5. Build a new Character instance
-    6. Construct a LevelUpResult summary
+    4. Retrieve updated progression data (attack bonus, saving throws, etc.)
+    5. Construct a new Character instance
+    6. Build a LevelUpResult summary
     7. Return both the updated character and result
 
-Notes:
-    - This module contains no direct game rule logic.
-    - Rule implementations are delegated to:
-        - advancement.py (XP and level eligibility)
-        - progression.py (table lookups)
-        - hit_points.py (HP calculation)
-    - This separation keeps the engine maintainable and testable.
+Design principles:
+    - No mutation: all updates produce new objects
+    - No rule logic: this module delegates all game mechanics
+    - Uniform data model: all progression fields are always populated, even for
+      classes where the values are neutral (e.g., zero spell slots)
+
+Delegation:
+    - advancement.py:
+        Determines level-up eligibility based on XP and rules
+    - hit_points.py:
+        Calculates hit point gains using a DiceRoller
+    - rpgleveler.data:
+        Provides progression table lookups
+
+This separation keeps the engine modular, testable, and easy to extend.
 """
 from dataclasses import replace
 
 from diceroller.core import DiceRoller
 
 from rpgleveler.data import (
+    SavingThrowData,
+    SpellSlots,
+    ThiefSkills,
+    TurnUndead,
     get_attack_bonus,
     get_saving_throws,
     get_spell_slots,
     get_thief_skills,
     get_turn_undead,
-    SavingThrowData,
-    SpellSlots,
-    ThiefSkills,
-    TurnUndead,
 )
+from rpgleveler.engine.advancement import can_level_up
+from rpgleveler.engine.hit_points import roll_hp_gain
 from rpgleveler.shared import (
-    ClassName, 
-    Race,
     Character,
     LevelUpResult,
 )
-from advancement import can_level_up
-from hit_points import roll_hp_gain
 
 
 class LevelUpError(Exception):
-    """Raised when a character cannot level up."""
+    """Raised when a character is not eligible to level up."""
 
 
 def level_up(
@@ -65,7 +71,10 @@ def level_up(
     Apply a single level-up to a character.
 
     This function performs a complete level-up operation, returning both the
-    updated character state and a structured summary of the changes.
+    updated character state and a structured summary of the result.
+
+    All progression data is retrieved through dedicated modules, ensuring that
+    this function remains a pure orchestration layer.
 
     Args:
         character:
@@ -75,17 +84,18 @@ def level_up(
 
     Returns:
         tuple[Character, LevelUpResult]:
-            A tuple containing:
-                - The new Character instance with updated values
-                - A LevelUpResult describing the changes
+            - A new Character instance reflecting the updated state
+            - A LevelUpResult describing the outcome of the level-up
 
     Raises:
         LevelUpError:
             If the character is not eligible to level up.
 
     Notes:
-        - The original character is not modified.
-        - All rule logic is delegated to engine submodules.
+        - The input character is never modified.
+        - All progression fields are always populated.
+        - Class-specific features (e.g., spell slots, thief skills) are
+          represented using neutral/default values when not applicable.
     """
     _validate_can_level_up(character)
 
@@ -117,6 +127,7 @@ def level_up(
 
     level_up_result = LevelUpResult(
         class_name=character.class_name,
+        race=character.race,
         old_level=old_level,
         new_level=new_level,
         hp_gained=hp_gained,
@@ -133,10 +144,10 @@ def level_up(
 
 def _validate_can_level_up(character: Character) -> None:
     """
-    Validate that a character is eligible to level up.
+    Ensure that a character is eligible to level up.
 
-    This function delegates to the advancement module to determine whether the
-    character meets XP and level requirements.
+    This function delegates eligibility checks to the advancement module, which
+    evaluates XP thresholds and level constraints.
 
     Args:
         character:
@@ -144,7 +155,7 @@ def _validate_can_level_up(character: Character) -> None:
 
     Raises:
         LevelUpError:
-            If the character does not qualify for level advancement.
+            If the character does not meet the requirements for advancement.
     """
     if not can_level_up(character):
         raise LevelUpError("Character cannot level up")
@@ -162,7 +173,7 @@ def _build_new_character(
     turn_undead: TurnUndead
 ) -> Character:
     """
-    Construct a new Character instance with updated level-up values.
+    Construct a new Character instance with updated level-dependent values.
 
     This function uses dataclasses.replace to preserve immutability while
     updating only the fields affected by leveling.
@@ -179,11 +190,11 @@ def _build_new_character(
         saving_throws:
             Updated saving throw values.
         new_spell_slots:
-            Updated spell slots (if applicable).
+            Updated spell slots.
         thief_skills:
-            Updated thief skill values (if applicable).
+            Updated thief skill values.
         turn_undead:
-            Updated turn undead values (if applicable).
+            Updated turn undead values.
 
     Returns:
         Character:
@@ -191,7 +202,8 @@ def _build_new_character(
 
     Notes:
         - The original character is not modified.
-        - Only level-dependent fields are updated.
+        - All fields are explicitly updated to maintain a complete, consistent
+          character snapshot.
     """
     return replace(
         character,
