@@ -195,8 +195,9 @@ def get_attack_bonus(class_name: ClassName, level: int) -> int:
         >>> get_attack_bonus(ClassName.CLERIC, 4)
         3
     """
-    try:
-        return ATTACK_BONUS[class_name][level]
-    except KeyError:
-        err_msg = f"Invalid class/level combination: {class_name}, {level}"
-        raise ValueError(err_msg)
+    if class_name not in ATTACK_BONUS:
+        raise ValueError(f"Invalid class: {class_name}")
+    if level not in ATTACK_BONUS[class_name]:
+        raise ValueError(f"Invalid level: {level}")
+    
+    return ATTACK_BONUS[class_name][level]

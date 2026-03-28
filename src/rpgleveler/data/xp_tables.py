@@ -1,4 +1,34 @@
-"""TODO add comment"""
+"""
+Experience point (XP) progression tables for Basic Fantasy RPG.
+
+This module defines the XP thresholds required for each character class to reach
+a given level. The data is derived directly from the official Basic Fantasy RPG
+class progression tables.
+
+Structure:
+    XP_TABLES[class_name][level] -> xp_required
+
+Where:
+    - class_name is a `ClassName` enum
+    - level is the target character level (int)
+    - xp_required is the minimum cumulative XP needed to attain that level
+
+Notes:
+    - Level 1 always starts at 0 XP.
+    - XP thresholds are cumulative (not incremental).
+    - Each class has its own independent progression table.
+    - Data is treated as immutable game rules.
+
+Implementation details:
+    - Raw data is defined in mutable dictionaries for readability.
+    - Data is wrapped using `MappingProxyType` to enforce runtime immutability.
+    - Consumers should use `get_xp_requirement()` rather than accessing tables
+      directly.
+
+Example:
+    >>> get_xp_requirement(ClassName.FIGHTER, 5)
+    16000
+"""
 
 from __future__ import annotations
 
@@ -8,11 +38,11 @@ from typing import Final
 from rpgleveler.shared import ClassName
 
 type XPByLevel = dict[int, int]
-"""TODO add comment"""
+"""Mapping of level → cumulative XP required."""
 
 
 type XPByClassName = dict[ClassName, XPByLevel]
-"""TODO add comment"""
+"""Mapping of class → level-based XP progression."""
 
 
 # XP progression tables keyed by class name.
@@ -113,7 +143,17 @@ _raw_xp_tables: Final[XPByClassName] = {
 def _freeze(data: XPByClassName
 ) -> MappingProxyType[ClassName, MappingProxyType[int, int]]:
     """
-    TODO: add comments
+    Convert nested XP data into immutable mappings.
+
+    Both the outer mapping (class → levels) and inner mappings (level → XP
+    values) are wrapped in `MappingProxyType` to prevent modification at
+    runtime.
+
+    Args:
+        data: Mutable XP table data.
+
+    Returns:
+        A fully read-only nested mapping structure.
     """
     return MappingProxyType({
         cls: MappingProxyType(levels) for cls, levels in data.items()
@@ -126,7 +166,24 @@ XP_TABLES = _freeze(_raw_xp_tables)
 
 def get_xp_requirement(class_name: ClassName, level: int) -> int:
     """
-    TODO: add comments
+    Retrieve the XP requirement for a given class and level.
+
+    This function provides a safe access layer over the XP tables, ensuring
+    invalid inputs are handled consistently.
+
+    Args:
+        class_name: The character class.
+        level: The target character level (1–20).
+
+    Returns:
+        The cumulative XP required to reach the specified level.
+
+    Raises:
+        ValueError: If the class or level is not present in the table.
+
+    Example:
+        >>> get_xp_requirement(ClassName.CLERIC, 3)
+        3000
     """
     if class_name not in XP_TABLES:
         raise ValueError(f"Invalid class: {class_name}")

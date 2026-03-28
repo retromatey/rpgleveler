@@ -75,14 +75,14 @@ def test_get_attack_bonus_invalid_class():
     with pytest.raises(ValueError) as exc:
         get_attack_bonus(FakeClass(), 1)
 
-    assert "Invalid class/level combination" in str(exc.value)
+    assert "Invalid class" in str(exc.value)
 
 
 def test_get_attack_bonus_invalid_level():
     with pytest.raises(ValueError) as exc:
         get_attack_bonus(ClassName.CLERIC, 999)
 
-    assert "Invalid class/level combination" in str(exc.value)
+    assert "Invalid level" in str(exc.value)
 
 
 def test_attack_bonus_progression_monotonic():
