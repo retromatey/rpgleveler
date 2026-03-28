@@ -1,8 +1,20 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
+from rpgleveler.data import (
+    SavingThrowData,
+    SpellSlots,
+    ThiefSkills,
+    TurnUndead,
+)
 from rpgleveler.engine.leveler import level_up, LevelUpError
-from rpgleveler.shared.character import Character, AbilityScores
+from rpgleveler.shared import (
+    AbilityScores,
+    ClassName, 
+    Race,
+    Character,
+    LevelUpResult,
+)
 
 
 # --- Fixtures -----------------------------------------------------------------
@@ -11,16 +23,16 @@ from rpgleveler.shared.character import Character, AbilityScores
 def sample_character():
     return Character(
         name="Testy",
-        race="human",
-        class_name="fighter",
+        race=Race.HUMAN,
+        class_name=ClassName.FIGHTER,
         level=1,
         xp=9999,
         hp=10,
         attack_bonus=1,
-        saving_throws=None,
-        spell_slots=None,
-        thief_skills=None,
-        turn_undead=None,
+        saving_throws=SavingThrowData(0,0,0,0,0)
+        spell_slots=SpellSlots(0,0,0,0,0)
+        thief_skills=ThiefSkills(0,0,0,0,0,0,0,0)
+        turn_undead=TurnUndead(*(None,)*8)
         abilities=AbilityScores(0, 0, 0, 0, 0, 0),
         ability_mods={},
         ac=0,

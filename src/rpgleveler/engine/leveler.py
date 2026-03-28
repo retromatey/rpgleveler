@@ -31,7 +31,12 @@ from dataclasses import replace
 
 from diceroller.core import DiceRoller
 
-from rpgleveler.data (
+from rpgleveler.data import (
+    get_attack_bonus,
+    get_saving_throws,
+    get_spell_slots,
+    get_thief_skills,
+    get_turn_undead,
     SavingThrowData,
     SpellSlots,
     ThiefSkills,
@@ -45,14 +50,6 @@ from rpgleveler.shared import (
 )
 from advancement import can_level_up
 from hit_points import roll_hp_gain
-from progression import (
-    apply_saving_throw_modifiers,
-    get_attack_bonus,
-    get_saving_throws,
-    get_spell_slots,
-    get_thief_skills,
-    get_turn_undead,
-)
 
 
 class LevelUpError(Exception):
@@ -100,8 +97,8 @@ def level_up(
 
     new_attack_bonus = get_attack_bonus(character.class_name, new_level)
 
-    base_saves = get_saving_throws(character.class_name, new_level)
-    saving_throws = apply_saving_throw_modifiers(base_saves, character.race)
+    saving_throws = get_saving_throws(
+        character.class_name, character.race, new_level)
 
     new_spell_slots = get_spell_slots(character.class_name, new_level)
     thief_skills = get_thief_skills(character.class_name, new_level)
