@@ -96,7 +96,7 @@ class TurnUndead:
         return vars(self)
 
     @classmethod
-    def from_dict(cls, data: dict[str, int | str | None]) -> TurnUndead:
+    def from_dict(cls, data: dict[str, int | Literal['T','D'] | None]) -> TurnUndead:
         return cls(**data)
 
 
