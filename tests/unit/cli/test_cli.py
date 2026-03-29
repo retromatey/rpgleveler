@@ -1,8 +1,14 @@
+from importlib.metadata import PackageNotFoundError
 from unittest.mock import patch
 
 import pytest
 
-from rpgleveler.cli.cli import create_dice_roller, main, parse_args
+from rpgleveler.cli.cli import (
+    _project_version,
+    create_dice_roller,
+    main,
+    parse_args,
+)
 
 
 def test_parse_args_defaults():
@@ -46,3 +52,29 @@ def test_main_handles_exception(mock_handler, capsys):
 
     captured = capsys.readouterr()
     assert "Error: boom" in captured.err
+
+
+def test_main_success(tmp_path, monkeypatch):
+    input_file = tmp_path / "char.json"
+    input_file.write_text("{}")
+
+    args = [str(input_file), "--seed", "123"]
+
+    # stub handler so we don't depend on full engine
+    monkeypatch.setattr(
+        "rpgleveler.cli.cli.handle_level_up",
+        lambda **kwargs: None,
+    )
+
+    main(args)
+
+
+def test_project_version_fallback(monkeypatch):
+    def fake_version(_):
+        raise PackageNotFoundError
+
+    monkeypatch.setattr("rpgleveler.cli.cli.version", fake_version)
+
+    result = _project_version()
+
+    assert result == "unknown"    
