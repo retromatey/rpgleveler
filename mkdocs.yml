@@ -68,12 +68,21 @@ nav:
   - Character Leveling: character-leveling.md
   - API Reference:
       - Overview: api/index.md
-      - Leveler: api/leveler.md
-      - Character: api/character.md
-      - LevelUpResult: api/level_up_result.md
-      - Progression: api/progression.md
-      - Hit Points: api/hit_points.md
-      - Advancement: api/advancement.md
+      - Core:
+          - Character: api/core/character.md
+          - ClassNames: api/core/class_names.md
+          - LevelUpResult: api/core/level_up_result.md
+          - Races: api/core/races.md
+          - SavingThrowData: api/core/saving_throw_data.md
+          - SpellSlots: api/core/spell_slots.md
+          - ThiefSkills: api/core/thief_skills.md
+          - TurnUndead: api/core/turn_undead.md
+      - Engine:
+          - Advancement: api/engine/advancement.md
+          - Leveler: api/engine/leveler.md
+      - IO:
+          - Character IO: api/io/character_io.md
+
   - Development: development.md
 
 copyright: Copyright © 2026 Jason Tennant — MIT License

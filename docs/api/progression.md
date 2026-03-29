@@ -1,3 +1,0 @@
-# Progression
-
-::: rpgleveler.engine.progression

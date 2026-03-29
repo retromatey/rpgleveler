@@ -1,3 +1,0 @@
-# Character
-
-::: rpgleveler.shared.character

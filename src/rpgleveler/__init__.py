@@ -15,10 +15,13 @@ from rpgleveler.core.character import Character
 from rpgleveler.core.level_up_result import LevelUpResult
 from rpgleveler.engine.advancement import can_level_up
 from rpgleveler.engine.leveler import level_up
+from rpgleveler.io.character_io import load_character, save_character
 
 __all__ = [
     "Character",
     "LevelUpResult",
     "can_level_up",
     "level_up",
+    "load_character",
+    "save_character",
 ]
