@@ -18,7 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
-rpgleveler = "rpgleveler.cli:main"
+rpgleveler = "rpgleveler.cli.cli:main"
 
 [project.optional-dependencies]
 dev = [
