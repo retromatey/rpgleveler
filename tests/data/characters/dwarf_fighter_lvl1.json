@@ -1,0 +1,75 @@
+{
+  "name": "Thorin",
+  "race": "dwarf",
+  "class": "fighter",
+  "level": 1,
+  "xp": 2500,
+
+  "abilities": {
+    "STR": 16,
+    "DEX": 12,
+    "CON": 15,
+    "INT": 10,
+    "WIS": 11,
+    "CHA": 9
+  },
+
+  "ability_mods": {
+    "STR": 2,
+    "DEX": 0,
+    "CON": 1,
+    "INT": 0,
+    "WIS": 0,
+    "CHA": -1
+  },
+
+  "hp": 10,
+  "ac": 15,
+  "attack_bonus": 1,
+
+  "saving_throws": {
+    "death_ray_or_poison": 12,
+    "magic_wands": 13,
+    "paralysis_or_petrify": 14,
+    "dragon_breath": 15,
+    "spells": 17
+  },
+
+  "spell_slots": {
+    "level_1": 0,
+    "level_2": 0,
+    "level_3": 0,
+    "level_4": 0,
+    "level_5": 0
+  },
+
+  "thief_skills": {
+    "open_locks": 0,
+    "pick_pockets": 0,
+    "find_traps": 0,
+    "remove_traps": 0,
+    "move_silently": 0,
+    "climb_walls": 0,
+    "hide_in_shadows": 0,
+    "hear_noise": 0
+  },
+
+  "turn_undead": {
+    "skeleton": null,
+    "zombie": null,
+    "ghoul": null,
+    "wight": null,
+    "wraith": null,
+    "mummy": null,
+    "spectre": null,
+    "vampire": null
+  },
+
+  "money_gp": 50,
+  "inventory": [
+    "chain mail",
+    "shield",
+    "battle axe",
+    "torch"
+  ]
+}

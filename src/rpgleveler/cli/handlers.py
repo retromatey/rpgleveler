@@ -21,6 +21,6 @@ def handle_level_up(
     if output_path:
         save_character(new_character, output_path)
     else:
-        data = character.to_dict()
+        data = new_character.to_dict()
         output = json.dumps(data, indent=2)
         print(output)
