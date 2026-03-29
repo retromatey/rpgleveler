@@ -77,7 +77,7 @@ class ThiefSkills:
     hide_in_shadows: int
     hear_noise: int
 
-    def to_dict(self) -> dict[str: int]:
+    def to_dict(self) -> dict[str, int]:
         return vars(self)
 
     @classmethod
