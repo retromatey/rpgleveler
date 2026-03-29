@@ -1,112 +1,178 @@
 import pytest
-from unittest.mock import MagicMock
 
-from rpgleveler.engine.hit_points import roll_hp_gain
-from rpgleveler.shared.character import Character, AbilityScores
+from rpgleveler.core import ClassName, Race
+from rpgleveler.engine.hit_points import (
+    _apply_racial_cap,
+    _parse_hit_dice,
+    roll_hp_gain,
+)
+from rpgleveler.shared import Character
+
+# -------------------------
+# Helpers
+# -------------------------
+
+class DummyDiceRoller:
+    def __init__(self, value: int):
+        self.value = value
+
+    def roll(self, expr: str) -> int:
+        return self.value
 
 
-# --- Fixtures -----------------------------------------------------------------
-
-@pytest.fixture
-def base_character():
+def make_character(
+    *,
+    level=1,
+    race=Race.HUMAN,
+    con_mod=0,
+    class_name=ClassName.FIGHTER,
+):
     return Character(
-        name="Testy",
-        race="human",
-        class_name="fighter",
-        level=1,
-        xp=0,
+        abilities=None,
+        ability_mods={"CON": con_mod},
+        ac=10,
+        attack_bonus=0,
+        class_name=class_name,
         hp=10,
-        attack_bonus=1,
-        saving_throws=None,
-        spell_slots=None,
-        thief_skills=None,
-        turn_undead=None,
-        abilities=AbilityScores(0, 0, 0, 0, 0, 0),
-        ability_mods={"CON": 0},
-        ac=0,
         inventory=[],
+        level=level,
         money_gp=0,
+        name=None,
+        race=race,
+        saving_throws=None,
+        xp=0,
     )
 
 
-@pytest.fixture
-def rng():
-    return MagicMock()
+# -------------------------
+# _parse_hit_dice
+# -------------------------
+
+def test_parse_hit_dice_with_bonus():
+    assert _parse_hit_dice("3d6+2") == (3, 6, 2)
 
 
-# --- Basic Behavior -----------------------------------------------------------
-
-def test_roll_hp_gain_returns_int(base_character, rng):
-    rng.roll.return_value = 4
-    result = roll_hp_gain(base_character, rng)
-    assert isinstance(result, int)
+def test_parse_hit_dice_without_bonus():
+    assert _parse_hit_dice("2d8") == (2, 8, 0)
 
 
-def test_roll_hp_gain_uses_rng(base_character, rng):
-    rng.roll.return_value = 4
-    roll_hp_gain(base_character, rng)
-    rng.roll.assert_called_once()
+def test_parse_hit_dice_invalid():
+    with pytest.raises(ValueError):
+        _parse_hit_dice("bad_input")
 
 
-# --- Class-Based Dice ---------------------------------------------------------
+# -------------------------
+# _apply_racial_cap
+# -------------------------
 
-def test_roll_hp_gain_varies_by_class(rng, base_character):
+def test_racial_cap_applies_to_elf():
+    assert _apply_racial_cap(8, Race.ELF) == 6
+
+
+def test_racial_cap_applies_to_halfling():
+    assert _apply_racial_cap(10, Race.HALFLING) == 6
+
+
+def test_racial_cap_not_applied():
+    assert _apply_racial_cap(8, Race.HUMAN) == 8
+
+
+# -------------------------
+# roll_hp_gain
+# -------------------------
+
+def test_roll_hp_gain_pre_9_with_con(monkeypatch):
     """
-    Different classes should use different hit dice.
-    This test will evolve once hit dice are implemented.
+    Level < 10 → roll + CON modifier
     """
-    rng.roll.return_value = 4
-    fighter = base_character
-    cleric = base_character.__class__(**{**base_character.__dict__, "class_name": "cleric"})
-    result_fighter = roll_hp_gain(fighter, rng)
-    result_cleric = roll_hp_gain(cleric, rng)
-    # We don't assert exact values yet, just that function runs
-    assert isinstance(result_fighter, int)
-    assert isinstance(result_cleric, int)
+    char = make_character(level=1, con_mod=2)
+
+    monkeypatch.setattr(
+        "rpgleveler.engine.hit_points.get_hit_dice",
+        lambda c, lvl: "1d8"
+    )
+
+    rng = DummyDiceRoller(5)
+
+    result = roll_hp_gain(char, rng)
+
+    assert result == 7  # 5 + 2
 
 
-# --- Constitution Modifier ----------------------------------------------------
-
-def test_roll_hp_gain_applies_con_modifier(rng, base_character):
-    rng.roll.return_value = 4
-    character = base_character.__class__(**{
-        **base_character.__dict__,
-        "ability_mods": {"CON": 2},
-    })
-    result = roll_hp_gain(character, rng)
-    assert result >= 6  # 4 roll + 2 modifier
-
-
-# --- Minimum HP Rule ----------------------------------------------------------
-
-def test_roll_hp_gain_minimum_one(rng, base_character):
+def test_roll_hp_gain_pre_9_minimum_one(monkeypatch):
     """
-    Even with negative CON modifiers, HP gain should not drop below 1.
+    Ensure minimum HP gain is 1
     """
-    rng.roll.return_value = 1
-    character = base_character.__class__(**{
-        **base_character.__dict__,
-        "ability_mods": {"CON": -5},
-    })
-    result = roll_hp_gain(character, rng)
-    assert result >= 1
+    char = make_character(level=1, con_mod=-10)
+
+    monkeypatch.setattr(
+        "rpgleveler.engine.hit_points.get_hit_dice",
+        lambda c, lvl: "1d4"
+    )
+
+    rng = DummyDiceRoller(1)
+
+    result = roll_hp_gain(char, rng)
+
+    assert result == 1
 
 
-# --- Immutability -------------------------------------------------------------
+def test_roll_hp_gain_racial_cap(monkeypatch):
+    """
+    Elf caps die size to d6
+    """
+    char = make_character(level=1, race=Race.ELF)
 
-def test_roll_hp_gain_does_not_modify_character(base_character, rng):
-    rng.roll.return_value = 4
-    original_hp = base_character.hp
-    roll_hp_gain(base_character, rng)
-    assert base_character.hp == original_hp
+    monkeypatch.setattr(
+        "rpgleveler.engine.hit_points.get_hit_dice",
+        lambda c, lvl: "1d8"
+    )
+
+    captured = {}
+
+    class CaptureRoller:
+        def roll(self, expr):
+            captured["expr"] = expr
+            return 3
+
+    rng = CaptureRoller()
+
+    roll_hp_gain(char, rng)
+
+    assert captured["expr"] == "1d6"
 
 
-# --- Error Handling -----------------------------------------------------------
+def test_roll_hp_gain_post_9_fixed(monkeypatch):
+    """
+    Level >= 10 → fixed bonus only, no CON
+    """
+    char = make_character(level=9, con_mod=5)
 
-def test_roll_hp_gain_invalid_class_raises(rng, base_character):
-    character = base_character.__class__(**{
-        **base_character.__dict__,
-        "class_name": "invalid_class",
-    })
-    with pytest.raises(KeyError):
-        roll_hp_gain(character, rng)
+    monkeypatch.setattr(
+        "rpgleveler.engine.hit_points.get_hit_dice",
+        lambda c, lvl: "9d8+3"
+    )
+
+    rng = DummyDiceRoller(999)  # should not matter
+
+    result = roll_hp_gain(char, rng)
+
+    assert result == 3
+
+
+def test_roll_hp_gain_post_9_minimum_one(monkeypatch):
+    """
+    Fixed bonus still respects minimum of 1
+    """
+    char = make_character(level=9)
+
+    monkeypatch.setattr(
+        "rpgleveler.engine.hit_points.get_hit_dice",
+        lambda c, lvl: "9d8+0"
+    )
+
+    rng = DummyDiceRoller(0)
+
+    result = roll_hp_gain(char, rng)
+
+    assert result == 1
