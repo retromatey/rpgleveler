@@ -1,34 +1,12 @@
 import pytest
 
-from rpgleveler.core import Character, ClassName
+from rpgleveler.core import ClassName
 from rpgleveler.engine.advancement import (
     MAX_LEVEL,
     can_level_up,
     get_next_level_threshold,
     is_max_level,
 )
-
-# -------------------------
-# Helpers
-# -------------------------
-
-def make_character(*, level=1, xp=0, class_name=ClassName.FIGHTER):
-    return Character(
-        abilities=None,
-        ability_mods={},
-        ac=10,
-        attack_bonus=0,
-        class_name=class_name,
-        hp=10,
-        inventory=[],
-        level=level,
-        money_gp=0,
-        name=None,
-        race=None,
-        saving_throws=None,
-        xp=xp,
-    )
-
 
 # -------------------------
 # is_max_level
@@ -67,8 +45,8 @@ def test_get_next_level_threshold_raises_at_max_level():
 # can_level_up
 # -------------------------
 
-def test_can_level_up_true(monkeypatch):
-    char = make_character(level=1, xp=2000)
+def test_can_level_up_true(monkeypatch, character_factory):
+    char = character_factory(level=1, xp=2000)
 
     monkeypatch.setattr(
         "rpgleveler.engine.advancement.get_xp_requirement",
@@ -78,8 +56,8 @@ def test_can_level_up_true(monkeypatch):
     assert can_level_up(char) is True
 
 
-def test_can_level_up_false_not_enough_xp(monkeypatch):
-    char = make_character(level=1, xp=1000)
+def test_can_level_up_false_not_enough_xp(monkeypatch, character_factory):
+    char = character_factory(level=1, xp=1000)
 
     monkeypatch.setattr(
         "rpgleveler.engine.advancement.get_xp_requirement",
@@ -89,8 +67,8 @@ def test_can_level_up_false_not_enough_xp(monkeypatch):
     assert can_level_up(char) is False
 
 
-def test_can_level_up_false_at_max_level(monkeypatch):
-    char = make_character(level=MAX_LEVEL, xp=9999999)
+def test_can_level_up_false_at_max_level(monkeypatch, character_factory):
+    char = character_factory(level=MAX_LEVEL, xp=9999999)
 
     # even if XP is huge, should not level up
     monkeypatch.setattr(
