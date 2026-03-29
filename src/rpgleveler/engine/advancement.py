@@ -20,8 +20,8 @@ Notes:
 
 from __future__ import annotations
 
-from rpgleveler.shared import Character
 from rpgleveler.core import ClassName
+from rpgleveler.shared import Character
 
 MAX_LEVEL = 20
 

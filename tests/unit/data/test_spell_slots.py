@@ -2,13 +2,13 @@ from types import MappingProxyType
 
 import pytest
 
+from rpgleveler.core import ClassName
 from rpgleveler.data.spell_slots import (
     SPELL_SLOTS,
     SpellSlots,
     _freeze,
     get_spell_slots,
 )
-from rpgleveler.core import ClassName
 
 # ----------------------------
 # SpellSlots dataclass

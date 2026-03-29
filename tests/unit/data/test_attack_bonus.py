@@ -2,12 +2,12 @@ from types import MappingProxyType
 
 import pytest
 
+from rpgleveler.core import ClassName
 from rpgleveler.data.attack_bonus import (
     ATTACK_BONUS,
     _freeze,
     get_attack_bonus,
 )
-from rpgleveler.core import ClassName
 
 
 def test_freeze_returns_mappingproxy():

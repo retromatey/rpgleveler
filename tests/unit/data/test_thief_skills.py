@@ -2,13 +2,13 @@ from types import MappingProxyType
 
 import pytest
 
+from rpgleveler.core import ClassName
 from rpgleveler.data.thief_skills import (
     THIEF_SKILLS,
     ThiefSkills,
     _freeze,
     get_thief_skills,
 )
-from rpgleveler.core import ClassName
 
 # ----------------------------
 # ThiefSkills dataclass

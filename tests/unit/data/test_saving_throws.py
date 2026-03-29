@@ -2,6 +2,7 @@ from types import MappingProxyType
 
 import pytest
 
+from rpgleveler.core import ClassName, Race
 from rpgleveler.data.saving_throws import (
     SAVING_THROW_MODIFIERS,
     SAVING_THROWS,
@@ -10,7 +11,6 @@ from rpgleveler.data.saving_throws import (
     _freeze_race_modifiers,
     get_saving_throws,
 )
-from rpgleveler.core import ClassName, Race
 
 # ----------------------------
 # SavingThrowData behavior

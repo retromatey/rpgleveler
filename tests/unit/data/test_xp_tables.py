@@ -2,12 +2,12 @@ from types import MappingProxyType
 
 import pytest
 
+from rpgleveler.core import ClassName
 from rpgleveler.data.xp_tables import (
     XP_TABLES,
     _freeze,
     get_xp_requirement,
 )
-from rpgleveler.core import ClassName
 
 # ----------------------------
 # Freeze helper
