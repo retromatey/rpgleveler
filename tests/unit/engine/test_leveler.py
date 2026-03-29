@@ -2,8 +2,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from rpgleveler.core import ClassName, Race
-from rpgleveler.data import (
+from rpgleveler.core import (
+    ClassName,
+    Race,
     SavingThrowData,
     SpellSlots,
     ThiefSkills,

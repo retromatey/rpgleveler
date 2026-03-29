@@ -2,10 +2,9 @@ from types import MappingProxyType
 
 import pytest
 
-from rpgleveler.core import ClassName
+from rpgleveler.core import ClassName, TurnUndead
 from rpgleveler.data.turn_undead import (
     TURN_UNDEAD,
-    TurnUndead,
     _freeze,
     get_turn_undead,
 )

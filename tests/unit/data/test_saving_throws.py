@@ -2,11 +2,10 @@ from types import MappingProxyType
 
 import pytest
 
-from rpgleveler.core import ClassName, Race
+from rpgleveler.core import ClassName, Race, SavingThrowData
 from rpgleveler.data.saving_throws import (
     SAVING_THROW_MODIFIERS,
     SAVING_THROWS,
-    SavingThrowData,
     _freeze_class_saving_throws,
     _freeze_race_modifiers,
     get_saving_throws,

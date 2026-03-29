@@ -39,11 +39,13 @@ from dataclasses import replace
 
 from diceroller.core import DiceRoller
 
-from rpgleveler.data import (
+from rpgleveler.core import (
     SavingThrowData,
     SpellSlots,
     ThiefSkills,
     TurnUndead,
+)
+from rpgleveler.data import (
     get_attack_bonus,
     get_saving_throws,
     get_spell_slots,
