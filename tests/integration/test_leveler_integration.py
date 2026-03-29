@@ -2,7 +2,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from rpgleveler.core import ClassName, Race
+from rpgleveler.core import (
+    AbilityScores,
+    Character,
+    ClassName,
+    Race,
+)
 from rpgleveler.data import (
     get_attack_bonus,
     get_saving_throws,
@@ -11,7 +16,6 @@ from rpgleveler.data import (
     get_turn_undead,
 )
 from rpgleveler.engine.leveler import level_up
-from rpgleveler.shared import AbilityScores, Character
 
 
 def make_character(class_name: ClassName) -> Character:

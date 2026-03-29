@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from rpgleveler.shared import Character
+from rpgleveler.core import Character
 
 
 def save_character(character: Character, path: str | Path) -> None:

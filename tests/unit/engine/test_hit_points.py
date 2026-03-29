@@ -1,12 +1,11 @@
 import pytest
 
-from rpgleveler.core import ClassName, Race
+from rpgleveler.core import Character, ClassName, Race
 from rpgleveler.engine.hit_points import (
     _apply_racial_cap,
     _parse_hit_dice,
     roll_hp_gain,
 )
-from rpgleveler.shared import Character
 
 # -------------------------
 # Helpers

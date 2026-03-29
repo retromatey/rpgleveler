@@ -3,7 +3,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from rpgleveler.core import (
+    AbilityScores,
+    Character,
     ClassName,
+    LevelUpResult,
     Race,
     SavingThrowData,
     SpellSlots,
@@ -15,11 +18,6 @@ from rpgleveler.engine.leveler import (
     _build_new_character,
     _validate_can_level_up,
     level_up,
-)
-from rpgleveler.shared import (
-    AbilityScores,
-    Character,
-    LevelUpResult,
 )
 
 # -------------------------

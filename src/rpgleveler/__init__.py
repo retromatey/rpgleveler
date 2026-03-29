@@ -11,10 +11,10 @@ Typical usage:
     new_character, result = level_up(character, rng=rng)
 """
 
+from rpgleveler.core.character import Character
+from rpgleveler.core.level_up_result import LevelUpResult
 from rpgleveler.engine.advancement import can_level_up
 from rpgleveler.engine.leveler import level_up
-from rpgleveler.shared.character import Character
-from rpgleveler.shared.level_up_result import LevelUpResult
 
 __all__ = [
     "Character",

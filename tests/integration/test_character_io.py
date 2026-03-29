@@ -2,7 +2,12 @@ import json
 import tempfile
 from pathlib import Path
 
-from rpgleveler.core import ClassName, Race
+from rpgleveler.core import (
+    AbilityScores,
+    Character,
+    ClassName,
+    Race,
+)
 from rpgleveler.data import (
     get_saving_throws,
     get_spell_slots,
@@ -10,7 +15,6 @@ from rpgleveler.data import (
     get_turn_undead,
 )
 from rpgleveler.io.character_io import load_character, save_character
-from rpgleveler.shared.character import AbilityScores, Character
 
 
 def make_character() -> Character:

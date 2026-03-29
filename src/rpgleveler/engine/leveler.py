@@ -40,6 +40,8 @@ from dataclasses import replace
 from diceroller.core import DiceRoller
 
 from rpgleveler.core import (
+    Character,
+    LevelUpResult,
     SavingThrowData,
     SpellSlots,
     ThiefSkills,
@@ -54,10 +56,6 @@ from rpgleveler.data import (
 )
 from rpgleveler.engine.advancement import can_level_up
 from rpgleveler.engine.hit_points import roll_hp_gain
-from rpgleveler.shared import (
-    Character,
-    LevelUpResult,
-)
 
 
 class LevelUpError(Exception):

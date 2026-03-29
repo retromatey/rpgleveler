@@ -1,13 +1,12 @@
 import pytest
 
-from rpgleveler.core import ClassName
+from rpgleveler.core import Character, ClassName
 from rpgleveler.engine.advancement import (
     MAX_LEVEL,
     can_level_up,
     get_next_level_threshold,
     is_max_level,
 )
-from rpgleveler.shared import Character
 
 # -------------------------
 # Helpers

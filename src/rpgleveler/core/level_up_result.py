@@ -1,13 +1,11 @@
 from dataclasses import dataclass
 
-from rpgleveler.core import (
-    ClassName,
-    Race,
-    SavingThrowData,
-    SpellSlots,
-    ThiefSkills,
-    TurnUndead,
-)
+from rpgleveler.core.class_names import ClassName
+from rpgleveler.core.races import Race
+from rpgleveler.core.saving_throw_data import SavingThrowData
+from rpgleveler.core.spell_slots import SpellSlots
+from rpgleveler.core.thief_skills import ThiefSkills
+from rpgleveler.core.turn_undead import TurnUndead
 
 
 @dataclass

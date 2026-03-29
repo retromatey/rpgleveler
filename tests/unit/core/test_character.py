@@ -1,13 +1,17 @@
 import json
 
-from rpgleveler.core import ClassName, Race
+from rpgleveler.core import (
+    AbilityScores,
+    Character,
+    ClassName,
+    Race,
+)
 from rpgleveler.data import (
     get_saving_throws,
     get_spell_slots,
     get_thief_skills,
     get_turn_undead,
 )
-from rpgleveler.shared.character import AbilityScores, Character
 
 
 def make_character() -> Character:

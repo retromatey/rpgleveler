@@ -41,9 +41,8 @@ import re
 
 from diceroller.core import DiceRoller
 
-from rpgleveler.core import Race
+from rpgleveler.core import Character, Race
 from rpgleveler.data import get_hit_dice
-from rpgleveler.shared import Character
 
 
 def _parse_hit_dice(expr: str) -> tuple[int, int, int]:
