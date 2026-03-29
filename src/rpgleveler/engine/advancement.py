@@ -21,6 +21,7 @@ Notes:
 from __future__ import annotations
 
 from rpgleveler.core import ClassName
+from rpgleveler.data import get_xp_requirement
 from rpgleveler.shared import Character
 
 MAX_LEVEL = 20
@@ -42,7 +43,13 @@ def can_level_up(character: Character) -> bool:
         bool:
             True if the character can level up, False otherwise.
     """
-    raise NotImplementedError
+    if is_max_level(character.level):
+        return False
+
+    required_xp = get_next_level_threshold(
+        character.class_name, character.level)
+
+    return character.xp >= required_xp
 
 
 def get_next_level_threshold(class_name: ClassName, level: int) -> int:
@@ -63,7 +70,11 @@ def get_next_level_threshold(class_name: ClassName, level: int) -> int:
         KeyError:
             If the class or level is not found in the XP tables.
     """
-    raise NotImplementedError
+    if level >= MAX_LEVEL:
+        raise ValueError(f"Level {level} is already at or above max level")
+
+    next_level = level + 1
+    return get_xp_requirement(class_name, next_level)
 
 
 def is_max_level(level: int) -> bool:
@@ -78,4 +89,4 @@ def is_max_level(level: int) -> bool:
         bool:
             True if the level is at or above MAX_LEVEL, False otherwise.
     """
-    raise NotImplementedError
+    return level >= MAX_LEVEL
