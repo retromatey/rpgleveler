@@ -66,6 +66,7 @@ nav:
   - Getting Started: getting-started.md
   - CLI Usage: cli.md
   - Character Leveling: character-leveling.md
+  - Character Schema: character-schema.md
   - API Reference:
       - Overview: api/index.md
       - Core:
