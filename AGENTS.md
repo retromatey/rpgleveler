@@ -5,11 +5,11 @@ This project uses a `src` layout.
 - `src/rpgleveler/`: package code.
 - `src/rpgleveler/data/`: static rules tables (XP, saves, spell slots, etc.).
 - `src/rpgleveler/engine/`: leveling and progression logic.
-- `src/rpgleveler/shared/`: shared models and literals.
+- `src/rpgleveler/core/`: core models and data classes.
 - `tests/unit/` and `tests/integration/`: automated test suites.
 - `docs/`: MkDocs site content; API pages are under `docs/api/`.
 
-Keep new modules in the matching domain folder (`data`, `engine`, or `shared`)
+Keep new modules in the matching domain folder (`data`, `engine`, or `core`)
 and mirror test paths under `tests/`.
 
 ## Build, Test, and Development Commands
