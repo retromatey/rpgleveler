@@ -44,10 +44,11 @@ You should see the command line usage information printed to the terminal.
 === "Python"
 
     ```python
-    from rpgleveler import level_up
+    from rpgleveler import level_up, load_character
     from diceroller.core import DiceRoller
 
     rng = DiceRoller()
+    character = load_character("character.json")
     new_character, result = level_up(character, rng=rng)
     print(new_character.to_dict())
     ```
