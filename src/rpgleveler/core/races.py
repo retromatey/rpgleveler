@@ -9,6 +9,7 @@ The enum values are lowercase strings to align with CLI input and external
 representations.
 
 Example:
+    ```
     >>> parse_race("elf")
     <Race.ELF: 'elf'>
 
@@ -16,6 +17,7 @@ Example:
     Traceback (most recent call last):
         ...
     ValueError: Invalid race: orc
+    ```
 """
 
 from enum import StrEnum, auto
@@ -32,10 +34,10 @@ class Race(StrEnum):
     names.
 
     Members:
-        DWARF: Dwarf race
-        ELF: Elf race
-        HALFLING: Halfling race
-        HUMAN: Human race
+        - DWARF: Dwarf race
+        - ELF: Elf race
+        - HALFLING: Halfling race
+        - HUMAN: Human race
     """
     DWARF = auto()
     ELF = auto()
@@ -61,8 +63,10 @@ def parse_race(race: str) -> Race:
         ValueError: If the input does not match any valid race.
 
     Example:
+        ```
         >>> parse_race("human")
         <Race.HUMAN: 'human'>
+        ```
     """
     try:
         return Race(race)

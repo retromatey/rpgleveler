@@ -36,8 +36,21 @@ The repository uses the **src layout**.
 rpgleveler
 ├── src
 │   └── rpgleveler
+│       ├── cli
+│       │   ├── cli.py
+│       │   └── handlers.py
+│       ├── core
+│       │   ├── character.py
+│       │   ├── class_names.py
+│       │   ├── level_up_result.py
+│       │   ├── races.py
+│       │   ├── saving_throw_data.py
+│       │   ├── spell_slots.py
+│       │   ├── thief_skills.py
+│       │   └── turn_undead.py
 │       ├── data
 │       │   ├── attack_bonus.py
+│       │   ├── hit_dice.py
 │       │   ├── saving_throws.py
 │       │   ├── spell_slots.py
 │       │   ├── thief_skills.py
@@ -47,15 +60,12 @@ rpgleveler
 │       │   ├── advancement.py
 │       │   ├── hit_points.py
 │       │   ├── leveler.py
-│       │   └── progression.py
-│       └── shared
-│           ├── character.py
-│           ├── level_up_result.py
-│           └── literals.py
-├── tests
+│       └── io
+│           └── character_io.py
 ├── docs
 ├── mkdocs.yml
-└── pyproject.toml
+├── pyproject.toml
+└── tests
 ```
 
 Key directories:
@@ -71,7 +81,7 @@ Key directories:
 
 ## Running Tests
 
-Tests are written using **pytest**.
+Tests are written using **pytest** with configuration settings in `pytest.ini`.
 
 ```bash
 pytest

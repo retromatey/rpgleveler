@@ -9,6 +9,7 @@ The enum values are lowercase strings to align with CLI input and external
 representations.
 
 Example:
+    ```
     >>> parse_class_name("cleric")
     <ClassName.CLERIC: 'cleric'>
 
@@ -16,6 +17,7 @@ Example:
     Traceback (most recent call last):
         ...
     ValueError: Invalid class name: invalid
+    ```
 """
 
 from enum import StrEnum, auto
@@ -32,10 +34,10 @@ class ClassName(StrEnum):
     names.
 
     Members:
-        CLERIC: Cleric class
-        FIGHTER: Fighter class
-        MAGIC_USER: Magic-user class
-        THIEF: Thief class
+        - CLERIC: Cleric class
+        - FIGHTER: Fighter class
+        - MAGIC_USER: Magic-user class
+        - THIEF: Thief class
     """
     CLERIC = auto()
     FIGHTER = auto()
@@ -61,8 +63,10 @@ def parse_class_name(class_name: str) -> ClassName:
         ValueError: If the input does not match any valid class name.
 
     Example:
+        ```
         >>> parse_class_name("fighter")
         <ClassName.FIGHTER: 'fighter'>
+        ```
     """
     try:
         return ClassName(class_name)
