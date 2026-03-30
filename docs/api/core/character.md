@@ -1,0 +1,3 @@
+# Character
+
+::: rpgleveler.core.character
